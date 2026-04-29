@@ -4,8 +4,8 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
 
 import WelcomeScreen from "../screens/WelcomeScreen";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
+// import LoginScreen from "../screens/LoginScreen";
+// import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import PrecificadorScreen from "../screens/PrecificadorScreen";
 import HoraHomemScreen from "../screens/HoraHomemScreen";
@@ -91,8 +91,8 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
+      {/* <Stack.Screen name="Login" component={LoginScreen} /> */}
+      {/* <Stack.Screen name="Register" component={RegisterScreen} /> */}
       <Stack.Screen name="Main" component={MainTabs} />
     </Stack.Navigator>
   );

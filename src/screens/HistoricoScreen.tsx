@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -11,18 +11,11 @@ import {
   ListRenderItem,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import { deleteSimulation, getSimulations } from '../services/api';
 import { Simulation } from '../types/api.types';
-import { useAuth } from '../context/AuthContext';
-import Button from '../components/Button';
 import { Colors, Radius, Shadow, Spacing, Typography } from '../constants/theme';
-import { RootStackParamList } from '../navigation/types';
 import { MAX_SIMULATIONS } from '../constants/api';
-
-type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TYPE_LABEL: Record<string, string> = {
   precificador: '🏷️ Precificador',
@@ -38,14 +31,11 @@ function formatDate(iso: string) {
 }
 
 export default function HistoricoScreen() {
-  const navigation = useNavigation<NavProp>();
-  const { isAuthenticated } = useAuth();
   const [simulations, setSimulations] = useState<Simulation[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   async function load(silent = false) {
-    if (!isAuthenticated) return;
     if (!silent) setLoading(true);
     try {
       const data = await getSimulations();
@@ -61,7 +51,7 @@ export default function HistoricoScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [isAuthenticated])
+    }, [])
   );
 
   function confirmDelete(id: string, title: string) {
@@ -121,31 +111,6 @@ export default function HistoricoScreen() {
       </View>
     </View>
   );
-
-  // Usuário não autenticado
-  if (!isAuthenticated) {
-    return (
-      <SafeAreaView style={styles.safe} edges={['top']}>
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>💾</Text>
-          <Text style={styles.emptyTitle}>Histórico indisponível</Text>
-          <Text style={styles.emptyDesc}>
-            Crie uma conta gratuita para salvar e acessar até {MAX_SIMULATIONS} simulações.
-          </Text>
-          <Button
-            title="Criar conta"
-            onPress={() => navigation.navigate('Register')}
-            style={styles.emptyBtn}
-          />
-          <Button
-            title="Já tenho conta — Entrar"
-            variant="secondary"
-            onPress={() => navigation.navigate('Login')}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (loading) {
     return (

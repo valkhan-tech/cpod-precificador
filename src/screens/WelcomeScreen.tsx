@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Dimensions,
   FlatList,
-  TouchableOpacity,
   Animated,
   ListRenderItem,
 } from 'react-native';
@@ -120,15 +119,6 @@ export default function WelcomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('Main')}
             style={styles.btnPrimary}
           />
-          <TouchableOpacity
-            style={styles.btnLogin}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.btnLoginText}>
-              Já tenho conta{' '}
-              <Text style={styles.btnLoginAccent}>Entrar</Text>
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Disclaimer */}

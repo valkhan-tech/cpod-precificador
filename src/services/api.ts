@@ -36,6 +36,7 @@
  *   204:     (no body)
  */
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   API_BASE_URL,
   ENDPOINTS,
@@ -50,6 +51,8 @@ import {
   Simulation,
   SimulationListResponse,
 } from '../types/api.types';
+
+const SIMULATIONS_KEY = 'cpod_simulations';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -89,9 +92,28 @@ async function apiCall<T>(
   return data as T;
 }
 
-// ─── Mock store (somente em dev / quando API não responde) ────────────────────
-const MOCK_SIMULATIONS: Simulation[] = [];
-let mockIdCounter = 1;
+// ─── Simulações local (AsyncStorage) ─────────────────────────────────────────
+let simulationIdCounter = 1;
+
+async function loadSimulations(): Promise<Simulation[]> {
+  try {
+    const data = await AsyncStorage.getItem(SIMULATIONS_KEY);
+    if (data) {
+      const parsed = JSON.parse(data);
+      const maxId = parsed.reduce((max: number, s: Simulation) => {
+        const numId = parseInt(s.id.replace('sim_', ''), 10);
+        return numId > max ? numId : max;
+      }, 0);
+      simulationIdCounter = maxId + 1;
+      return parsed;
+    }
+  } catch {}
+  return [];
+}
+
+async function saveSimulationsToStorage(simulations: Simulation[]): Promise<void> {
+  await AsyncStorage.setItem(SIMULATIONS_KEY, JSON.stringify(simulations));
+}
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 export async function login(payload: LoginRequest): Promise<AuthResponse> {
@@ -128,41 +150,39 @@ export async function logout(): Promise<void> {
 
 // ─── Simulações ───────────────────────────────────────────────────────────────
 export async function getSimulations(): Promise<SimulationListResponse> {
-  // TODO: trocar por chamada real
-  // return apiCall<SimulationListResponse>(ENDPOINTS.simulations);
-
   await delay(MOCK_DELAY_MS);
-  return { simulations: [...MOCK_SIMULATIONS].reverse(), total: MOCK_SIMULATIONS.length };
+  const simulations = await loadSimulations();
+  return { simulations: simulations.reverse(), total: simulations.length };
 }
 
 export async function saveSimulation(payload: SaveSimulationRequest): Promise<Simulation> {
-  // TODO: trocar por chamada real
-  // return apiCall<Simulation>(ENDPOINTS.simulations, { method: 'POST', body: JSON.stringify(payload) });
-
   await delay(MOCK_DELAY_MS);
 
-  if (MOCK_SIMULATIONS.length >= MAX_SIMULATIONS) {
+  const simulations = await loadSimulations();
+
+  if (simulations.length >= MAX_SIMULATIONS) {
     throw new Error('Você atingiu o limite de 10 simulações salvas. Exclua uma para continuar.');
   }
 
   const simulation: Simulation = {
-    id: `sim_${mockIdCounter++}`,
-    userId: 'usr_1',
+    id: `sim_${simulationIdCounter++}`,
+    userId: 'local',
     type: payload.type,
     title: payload.title,
     inputs: payload.inputs,
     results: payload.results,
     createdAt: new Date().toISOString(),
   };
-  MOCK_SIMULATIONS.push(simulation);
+
+  simulations.push(simulation);
+  await saveSimulationsToStorage(simulations);
   return simulation;
 }
 
 export async function deleteSimulation(id: string): Promise<void> {
-  // TODO: trocar por chamada real
-  // await apiCall<void>(ENDPOINTS.simulationById(id), { method: 'DELETE' });
-
   await delay(MOCK_DELAY_MS);
-  const idx = MOCK_SIMULATIONS.findIndex((s) => s.id === id);
-  if (idx !== -1) MOCK_SIMULATIONS.splice(idx, 1);
+
+  const simulations = await loadSimulations();
+  const filtered = simulations.filter((s) => s.id !== id);
+  await saveSimulationsToStorage(filtered);
 }
