@@ -1,24 +1,26 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View } from 'react-native';
+import React from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Text, View } from "react-native";
 
-import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import HomeScreen from '../screens/HomeScreen';
-import PrecificadorScreen from '../screens/PrecificadorScreen';
-import HoraHomemScreen from '../screens/HoraHomemScreen';
-import HistoricoScreen from '../screens/HistoricoScreen';
+import WelcomeScreen from "../screens/WelcomeScreen";
+import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
+import HomeScreen from "../screens/HomeScreen";
+import PrecificadorScreen from "../screens/PrecificadorScreen";
+import HoraHomemScreen from "../screens/HoraHomemScreen";
+import HistoricoScreen from "../screens/HistoricoScreen";
 
-import { Colors, Typography } from '../constants/theme';
-import { RootStackParamList, MainTabParamList } from './types';
+import { Colors, Typography } from "../constants/theme";
+import { RootStackParamList, MainTabParamList } from "./types";
 
 // ─── Ícones de tab (emoji simples, sem dependência extra) ─────────────────────
 function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
   return (
-    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ fontSize: focused ? 22 : 20, opacity: focused ? 1 : 0.6 }}>{emoji}</Text>
+    <View style={{ width: 40, height: 40, alignItems: "center", justifyContent: "center" }}>
+      <Text style={{ fontSize: focused ? 24 : 20, opacity: focused ? 1 : 0.6 }}>
+        {emoji}
+      </Text>
     </View>
   );
 }
@@ -34,8 +36,9 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: Colors.surface,
           borderTopColor: Colors.border,
-          height: 60,
-          paddingBottom: 8,
+          height: 100,
+          paddingBottom: 12,
+          paddingTop: 12,
         },
         tabBarActiveTintColor: Colors.teal700,
         tabBarInactiveTintColor: Colors.subtle,
@@ -49,7 +52,7 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          title: 'Início',
+          title: "Início",
           tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
         }}
       />
@@ -57,7 +60,7 @@ function MainTabs() {
         name="Precificador"
         component={PrecificadorScreen}
         options={{
-          title: 'Preços',
+          title: "Preços",
           tabBarIcon: ({ focused }) => <TabIcon emoji="🏷️" focused={focused} />,
         }}
       />
@@ -65,7 +68,7 @@ function MainTabs() {
         name="HoraHomem"
         component={HoraHomemScreen}
         options={{
-          title: 'Hora-Homem',
+          title: "Hora-Homem",
           tabBarIcon: ({ focused }) => <TabIcon emoji="⏱️" focused={focused} />,
         }}
       />
@@ -73,7 +76,7 @@ function MainTabs() {
         name="Historico"
         component={HistoricoScreen}
         options={{
-          title: 'Histórico',
+          title: "Histórico",
           tabBarIcon: ({ focused }) => <TabIcon emoji="💾" focused={focused} />,
         }}
       />
