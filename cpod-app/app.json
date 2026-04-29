@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "cPod Precificador",
+    "slug": "cpod-precificador",
+    "version": "1.0.0",
+    "description": "Ferramenta gratuita para empreendedores precificarem melhor seus produtos e serviços.",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#071e1d"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.cpod.precificador"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#071e1d"
+      },
+      "package": "com.cpod.precificador",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
