@@ -79,7 +79,12 @@ export default function PrecificadorScreen() {
       precoVenda = pvi;
     } else {
       const impostoCalc = impMei > 0 ? 0 : imp;
-      precoVenda = custoUnit / (1 - t - impostoCalc - m);
+      const denominador = 1 - t - impostoCalc - m;
+      if (denominador <= 0) {
+        Alert.alert('Dados inválidos', 'Margem de lucro muito alta para os valores informados.');
+        return;
+      }
+      precoVenda = custoUnit / denominador;
     }
 
     const investimento = custoUnit * qtd;
