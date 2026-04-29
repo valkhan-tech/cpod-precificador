@@ -44,14 +44,6 @@ const TOOLS: ToolCard[] = [
     accentColor: Colors.cyan,
     tab: 'HoraHomem',
   },
-  {
-    id: 'lote',
-    icon: '📦',
-    title: 'Simulador em Lote',
-    description: 'Simule múltiplos produtos de uma só vez e compare resultados.',
-    accentColor: Colors.mint,
-    tab: 'Lote',
-  },
 ];
 
 export default function HomeScreen() {

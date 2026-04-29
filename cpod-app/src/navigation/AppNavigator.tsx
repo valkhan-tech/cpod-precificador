@@ -9,7 +9,6 @@ import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PrecificadorScreen from '../screens/PrecificadorScreen';
 import HoraHomemScreen from '../screens/HoraHomemScreen';
-import LoteScreen from '../screens/LoteScreen';
 import HistoricoScreen from '../screens/HistoricoScreen';
 
 import { Colors, Typography } from '../constants/theme';
@@ -68,14 +67,6 @@ function MainTabs() {
         options={{
           title: 'Hora-Homem',
           tabBarIcon: ({ focused }) => <TabIcon emoji="⏱️" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="Lote"
-        component={LoteScreen}
-        options={{
-          title: 'Lote',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📦" focused={focused} />,
         }}
       />
       <Tab.Screen
