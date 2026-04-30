@@ -72,14 +72,14 @@ function MainTabs() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="⏱️" focused={focused} />,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Historico"
         component={HistoricoScreen}
         options={{
           title: "Histórico",
           tabBarIcon: ({ focused }) => <TabIcon emoji="💾" focused={focused} />,
         }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 }

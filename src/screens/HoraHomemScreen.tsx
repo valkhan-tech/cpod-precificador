@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +20,8 @@ import { useAuth } from '../context/AuthContext';
 import { saveSimulation } from '../services/api';
 import { Colors, Radius, Shadow, Spacing, Typography } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+
+const CARD_WIDTH = Dimensions.get('window').width - Spacing.lg * 2;
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -38,6 +41,7 @@ interface Colaborador {
   salario: string;
   encargos: string;
   horasMes: string;
+  ativo: boolean;
 }
 
 interface CalcResult {
@@ -88,7 +92,7 @@ export default function HoraHomemScreen() {
   const { isAuthenticated } = useAuth();
 
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([
-    { id: '1', nome: '', salario: '', encargos: '68', horasMes: '176' },
+    { id: '1', nome: '', salario: '', encargos: '68', horasMes: '176', ativo: true },
   ]);
 
   // Config
@@ -102,18 +106,37 @@ export default function HoraHomemScreen() {
 
   const [results, setResults] = useState<CalcResult | null>(null);
   const [saving, setSaving] = useState(false);
+  const [activeColabIndex, setActiveColabIndex] = useState(0);
+  const colabScrollRef = useRef<ScrollView>(null);
+
+  function scrollToColab(index: number) {
+    colabScrollRef.current?.scrollTo({ x: index * CARD_WIDTH, animated: true });
+    setActiveColabIndex(index);
+  }
 
   function addColaborador() {
     const id = String(Date.now());
-    setColaboradores((prev) => [
-      ...prev,
-      { id, nome: '', salario: '', encargos: '68', horasMes: '176' },
-    ]);
+    setColaboradores((prev) => {
+      const next = [...prev, { id, nome: '', salario: '', encargos: '68', horasMes: '176', ativo: true }];
+      setTimeout(() => scrollToColab(next.length - 1), 80);
+      return next;
+    });
   }
 
   function removeColaborador(id: string) {
     if (colaboradores.length <= 1) return;
-    setColaboradores((prev) => prev.filter((c) => c.id !== id));
+    setColaboradores((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      const newIndex = Math.min(activeColabIndex, next.length - 1);
+      setTimeout(() => scrollToColab(newIndex), 80);
+      return next;
+    });
+  }
+
+  function toggleColaboradorAtivo(id: string) {
+    setColaboradores((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ativo: !c.ativo } : c))
+    );
   }
 
   function updateColaborador(id: string, field: keyof Colaborador, value: string) {
@@ -123,9 +146,14 @@ export default function HoraHomemScreen() {
   }
 
   function calcular() {
-    for (const c of colaboradores) {
+    const ativos = colaboradores.filter((c) => c.ativo);
+    if (ativos.length === 0) {
+      Alert.alert('Dados inválidos', 'Ative pelo menos um colaborador para calcular.');
+      return;
+    }
+    for (const c of ativos) {
       if (!c.salario || parseN(c.salario) <= 0) {
-        const label = c.nome.trim() || `colaborador ${colaboradores.indexOf(c) + 1}`;
+        const label = c.nome.trim() || `colaborador ${ativos.indexOf(c) + 1}`;
         Alert.alert('Dados inválidos', `Informe o salário de "${label}".`);
         return;
       }
@@ -138,35 +166,39 @@ export default function HoraHomemScreen() {
     const fatExtra = parseN(faturamentoExtra);
     const antecip = parseN(antecipacaoLucros);
     const horasProj = parseN(horasProjeto);
-    const n = colaboradores.length;
+    const n = ativos.length;
 
-    // 1. Custo dos colaboradores
-    const detalhesBase = colaboradores.map((c) => {
+    // 1. Custo dos colaboradores (somente ativos)
+    const detalhesBase = ativos.map((c, i) => {
       const salario = parseN(c.salario);
       const enc = (parseN(c.encargos) || 68) / 100;
       const horas = parseN(c.horasMes) || 176;
-      const custoMes = salario * (1 + enc);  // salário + encargos
-      const valorHora = custoMes / horas;    // custo por hora
-      return { nome: c.nome.trim() || `Colaborador ${colaboradores.indexOf(c) + 1}`, salario, enc, horas, custoMes, valorHora };
+      // custo/hora base = (salário bruto + encargos) / horas mês
+      const custoMes = salario * (1 + enc);
+      const custoHoraBase = custoMes / horas;
+      return { nome: c.nome.trim() || `Colaborador ${i + 1}`, salario, enc, horas, custoMes, custoHoraBase };
     });
 
     let totalHoras = 0;
     let custoColaboradores = 0;
-    let custoHoraSomatorio = 0;
 
     detalhesBase.forEach((d) => {
       totalHoras += d.horas;
-      custoColaboradores += d.custoMes;   // = valorHora * horas
-      custoHoraSomatorio += d.valorHora;
+      custoColaboradores += d.custoMes;
     });
 
-    // 2. Métricas de equipe
+    // 2. Métricas de equipe (sem impostos — impostos só incidem sobre faturamento)
     const horasUnitarias = n > 0 ? totalHoras / n : 0;
     const rateioColab = n > 0 ? cfixo / n : 0;
-    const custoHoraUnitario = custoHoraSomatorio + rateioColab;
+    // custoHoraBase = (salário * (1+enc)) / horas
+    // custoHoraComRateio = (salário * (1+enc) + rateio) / horas
+    const custoHoraSomatorio = detalhesBase.reduce((acc, d) => acc + d.custoHoraBase, 0);
+    const custoHoraUnitario = detalhesBase.reduce(
+      (acc, d) => acc + (d.custoMes + rateioColab) / d.horas, 0
+    );
 
-    // 3. Faturamento
-    const custoTotal = custoColaboradores + cfixo;
+    // 3. Faturamento — impostos aplicados apenas aqui, sem bi-tributação
+    const custoTotal = custoColaboradores + cfixo; // apenas custos diretos
     const denominador = 1 - marg - imp;
     const faturamentoMinimo = denominador > 0 ? custoTotal / denominador : 0;
     const valorHoraSugerido = horasUnitarias > 0 ? faturamentoMinimo / horasUnitarias : 0;
@@ -175,13 +207,13 @@ export default function HoraHomemScreen() {
 
     // 4. Líquido meta
     const impostosValor = faturamentoMinimo * imp;
-    const liquidoMensal = faturamentoMinimo - impostosValor - custoColaboradores - cfixo;
+    const liquidoMensal = faturamentoMinimo - impostosValor - custoTotal;
     const liquidoPeriodo = liquidoMensal * proj;
 
-    // 5. Líquido real (se faturamento real informado)
+    // 5. Líquido real
     const temReal = fatExtra > 0;
     const impostosValorReal = fatExtra * imp;
-    const liquidoMensalReal = fatExtra - impostosValorReal - custoColaboradores - cfixo;
+    const liquidoMensalReal = fatExtra - impostosValorReal - custoTotal;
     const liquidoPeriodoReal = liquidoMensalReal * proj;
     const margemReal = fatExtra > 0 ? (liquidoMensalReal / fatExtra) * 100 : 0;
 
@@ -196,8 +228,8 @@ export default function HoraHomemScreen() {
       nome: d.nome,
       horasMes: d.horas,
       custoMes: d.custoMes,
-      custoHoraBase: d.valorHora,
-      custoHoraComRateio: d.valorHora + rateioColab,
+      custoHoraBase: d.custoHoraBase,
+      custoHoraComRateio: (d.custoMes + rateioColab) / d.horas,
       valorHoraVenda: valorHoraSugerido,
     }));
 
@@ -264,58 +296,111 @@ export default function HoraHomemScreen() {
           </View>
 
           {/* ── Colaboradores ─────────────────────────────── */}
-          {colaboradores.map((c, index) => (
-            <View key={c.id} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.cardSection}>
-                  Colaborador {index + 1}
-                </Text>
-                {colaboradores.length > 1 && (
-                  <TouchableOpacity onPress={() => removeColaborador(c.id)} style={styles.removeBtn}>
-                    <Text style={styles.removeBtnText}>Remover</Text>
-                  </TouchableOpacity>
-                )}
+          <View style={styles.colabWrapper}>
+            {/* Barra de navegação */}
+            <View style={styles.colabNavRow}>
+              <Text style={styles.colabNavTitle}>
+                Colaborador {activeColabIndex + 1} / {colaboradores.length}
+              </Text>
+              <View style={styles.colabNavActions}>
+                <TouchableOpacity
+                  style={[styles.navArrow, activeColabIndex === 0 && styles.navArrowDisabled]}
+                  onPress={() => activeColabIndex > 0 && scrollToColab(activeColabIndex - 1)}
+                  disabled={activeColabIndex === 0}
+                >
+                  <Text style={styles.navArrowText}>‹</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.navArrow, activeColabIndex === colaboradores.length - 1 && styles.navArrowDisabled]}
+                  onPress={() => activeColabIndex < colaboradores.length - 1 && scrollToColab(activeColabIndex + 1)}
+                  disabled={activeColabIndex === colaboradores.length - 1}
+                >
+                  <Text style={styles.navArrowText}>›</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.navAddBtn} onPress={addColaborador}>
+                  <Text style={styles.navAddBtnText}>+ Adicionar</Text>
+                </TouchableOpacity>
               </View>
-              <InputField
-                label="Nome"
-                placeholder={`Colaborador ${index + 1}`}
-                value={c.nome}
-                onChangeText={(v) => updateColaborador(c.id, 'nome', v)}
-              />
-              <InputField
-                label="Salário bruto (R$)"
-                placeholder="0,00"
-                keyboardType="decimal-pad"
-                prefix="R$"
-                value={c.salario}
-                onChangeText={(v) => updateColaborador(c.id, 'salario', v)}
-              />
-              <InputField
-                label="Encargos (%)"
-                hint="Custo patronal: INSS, FGTS, férias, etc. Média: 68%"
-                placeholder="68"
-                keyboardType="decimal-pad"
-                suffix="%"
-                value={c.encargos}
-                onChangeText={(v) => updateColaborador(c.id, 'encargos', v)}
-              />
-              <InputField
-                label="Horas trabalhadas no mês"
-                placeholder="176"
-                keyboardType="decimal-pad"
-                suffix="h"
-                value={c.horasMes}
-                onChangeText={(v) => updateColaborador(c.id, 'horasMes', v)}
-              />
             </View>
-          ))}
 
-          <Button
-            title="+ Adicionar colaborador"
-            variant="secondary"
-            onPress={addColaborador}
-            style={styles.addBtn}
-          />
+            {/* Dots */}
+            {colaboradores.length > 1 && (
+              <View style={styles.dotsRow}>
+                {colaboradores.map((_, i) => (
+                  <TouchableOpacity key={i} onPress={() => scrollToColab(i)}>
+                    <View style={[styles.dot, i === activeColabIndex && styles.dotActive]} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Scroll horizontal */}
+            <ScrollView
+              ref={colabScrollRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              onMomentumScrollEnd={(e) => {
+                const index = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
+                setActiveColabIndex(index);
+              }}
+            >
+              {colaboradores.map((c, index) => (
+                <View key={c.id} style={[styles.card, styles.colabCard, !c.ativo && styles.colabCardInativo]}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.cardHeaderLeft}>
+                      <TouchableOpacity
+                        style={[styles.checkbox, c.ativo && styles.checkboxActive]}
+                        onPress={() => toggleColaboradorAtivo(c.id)}
+                      >
+                        {c.ativo && <Text style={styles.checkboxCheck}>✓</Text>}
+                      </TouchableOpacity>
+                      <Text style={[styles.cardSection, !c.ativo && styles.cardSectionInativo]}>
+                        Colaborador {index + 1}{!c.ativo ? ' (inativo)' : ''}
+                      </Text>
+                    </View>
+                    {colaboradores.length > 1 && (
+                      <TouchableOpacity onPress={() => removeColaborador(c.id)} style={styles.removeBtn}>
+                        <Text style={styles.removeBtnText}>Remover</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <InputField
+                    label="Nome"
+                    placeholder={`Colaborador ${index + 1}`}
+                    value={c.nome}
+                    onChangeText={(v) => updateColaborador(c.id, 'nome', v)}
+                  />
+                  <InputField
+                    label="Salário bruto (R$)"
+                    placeholder="0,00"
+                    keyboardType="decimal-pad"
+                    prefix="R$"
+                    value={c.salario}
+                    onChangeText={(v) => updateColaborador(c.id, 'salario', v)}
+                  />
+                  <InputField
+                    label="Encargos (%)"
+                    hint="Custo patronal: INSS, FGTS, férias, etc. Média: 68%"
+                    placeholder="68"
+                    keyboardType="decimal-pad"
+                    suffix="%"
+                    value={c.encargos}
+                    onChangeText={(v) => updateColaborador(c.id, 'encargos', v)}
+                  />
+                  <InputField
+                    label="Horas trabalhadas no mês"
+                    placeholder="176"
+                    keyboardType="decimal-pad"
+                    suffix="h"
+                    value={c.horasMes}
+                    onChangeText={(v) => updateColaborador(c.id, 'horasMes', v)}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
 
           {/* ── Configurações de Cálculo ───────────────────── */}
           <View style={styles.card}>
@@ -415,9 +500,9 @@ export default function HoraHomemScreen() {
               <ResultCard
                 title="Custos da Equipe"
                 rows={[
-                  { label: `Colaboradores (${results.n})`, value: fmt(results.custoColaboradores) },
+                  { label: `Mão de obra (${results.n} ativo${results.n !== 1 ? 's' : ''})`, value: fmt(results.custoColaboradores) },
                   { label: 'Custo Fixo Mensal', value: fmt(parseN(custoFixo)) },
-                  { label: 'Custo Total Mensal', value: fmt(results.custoTotal), accent: 'danger' },
+                  { label: 'Total de Custos Diretos', value: fmt(results.custoTotal), accent: 'danger' },
                   { label: 'Rateio Custo Fixo/Colab.', value: fmt(results.rateioColab) },
                 ]}
               />
@@ -473,8 +558,8 @@ export default function HoraHomemScreen() {
               />
 
               <View style={styles.actionRow}>
-                <Button title="💾 Salvar" onPress={salvar} loading={saving} style={styles.actionBtn} />
-                <Button title="Limpar" variant="ghost" onPress={() => setResults(null)} style={styles.actionBtn} />
+                <Button title="💾 Salvar simulação" onPress={salvar} loading={saving} style={styles.actionBtnSave} />
+                <Button title="Limpar" variant="neutral" onPress={() => setResults(null)} style={styles.actionBtnClear} />
               </View>
             </View>
           )}
@@ -493,10 +578,103 @@ const styles = StyleSheet.create({
   pageDesc: { fontSize: Typography.sm, color: Colors.muted, lineHeight: 20 },
   card: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.lg, marginBottom: Spacing.md, ...Shadow.card },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  cardHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   cardSection: { fontSize: Typography.xs, fontWeight: Typography.bold, color: Colors.teal600, letterSpacing: 1, textTransform: 'uppercase' },
+  cardSectionInativo: { color: Colors.muted },
+  colabCardInativo: { opacity: 0.5 },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    backgroundColor: Colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxActive: {
+    backgroundColor: Colors.teal600,
+    borderColor: Colors.teal600,
+  },
+  checkboxCheck: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: Typography.bold,
+    lineHeight: 14,
+  },
   removeBtn: { backgroundColor: Colors.danger + '15', borderRadius: Radius.sm, paddingHorizontal: Spacing.sm, paddingVertical: 4 },
   removeBtnText: { color: Colors.danger, fontSize: Typography.xs, fontWeight: Typography.semibold },
-  addBtn: { marginBottom: Spacing.md },
+  colabWrapper: { marginBottom: Spacing.md },
+  colabNavRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  colabNavTitle: {
+    fontSize: Typography.xs,
+    fontWeight: Typography.bold,
+    color: Colors.teal600,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  colabNavActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  navArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.teal700,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navArrowDisabled: {
+    backgroundColor: Colors.border,
+  },
+  navArrowText: {
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: Typography.bold,
+    lineHeight: 24,
+  },
+  navAddBtn: {
+    height: 32,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.teal50,
+    borderWidth: 1.5,
+    borderColor: Colors.teal300,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navAddBtnText: {
+    color: Colors.teal700,
+    fontSize: Typography.xs,
+    fontWeight: Typography.semibold,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.border,
+  },
+  dotActive: {
+    backgroundColor: Colors.teal600,
+    width: 16,
+  },
+  colabCard: {
+    width: CARD_WIDTH,
+    marginBottom: 0,
+  },
   calcBtn: { marginBottom: Spacing.lg },
   resultsArea: { gap: Spacing.md },
   highlightRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
@@ -504,5 +682,6 @@ const styles = StyleSheet.create({
   highlightLabel: { fontSize: Typography.xs, color: '#fff', opacity: 0.85, textAlign: 'center', marginBottom: 4 },
   highlightValue: { fontSize: Typography.md, fontWeight: Typography.bold, color: '#fff', textAlign: 'center' },
   actionRow: { flexDirection: 'row', gap: Spacing.sm },
-  actionBtn: { flex: 1 },
+  actionBtnSave: { flex: 65 },
+  actionBtnClear: { flex: 25 },
 });
