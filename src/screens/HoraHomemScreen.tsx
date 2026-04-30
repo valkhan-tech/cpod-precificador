@@ -338,13 +338,16 @@ export default function HoraHomemScreen() {
             <ScrollView
               ref={colabScrollRef}
               horizontal
-              pagingEnabled
+              snapToInterval={CARD_WIDTH}
+              decelerationRate="fast"
+              disableIntervalMomentum
               showsHorizontalScrollIndicator={false}
               scrollEventThrottle={16}
               onMomentumScrollEnd={(e) => {
                 const index = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
                 setActiveColabIndex(index);
               }}
+              contentContainerStyle={{ paddingVertical: Spacing.md, paddingHorizontal: Spacing.sm }}
             >
               {colaboradores.map((c, index) => (
                 <View key={c.id} style={[styles.card, styles.colabCard, !c.ativo && styles.colabCardInativo]}>
@@ -604,7 +607,7 @@ const styles = StyleSheet.create({
   },
   removeBtn: { backgroundColor: Colors.danger + '15', borderRadius: Radius.sm, paddingHorizontal: Spacing.sm, paddingVertical: 4 },
   removeBtnText: { color: Colors.danger, fontSize: Typography.xs, fontWeight: Typography.semibold },
-  colabWrapper: { marginBottom: Spacing.md },
+  colabWrapper: { marginBottom: Spacing.md, marginHorizontal: -Spacing.sm },
   colabNavRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
