@@ -121,13 +121,14 @@ export default function RegisterScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.bg },
+  safe: { flex: 1, backgroundColor: Colors.teal900 },
   flex: { flex: 1 },
   scroll: {
     flexGrow: 1,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.xl,
+    backgroundColor: Colors.bg,
   },
   logoArea: {
     alignItems: 'center',

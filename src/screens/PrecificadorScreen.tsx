@@ -429,12 +429,12 @@ export default function PrecificadorScreen() {
               </View>
 
               <View style={styles.actionRow}>
-                <Button
+                {/* <Button
                   title="💾 Salvar simulação"
                   onPress={salvar}
                   loading={saving}
                   style={styles.actionBtnSave}
-                />
+                /> */}
                 <Button
                   title="Limpar"
                   variant="neutral"
@@ -452,9 +452,9 @@ export default function PrecificadorScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.bg },
+  safe: { flex: 1, backgroundColor: Colors.teal900 },
   flex: { flex: 1 },
-  scroll: { flexGrow: 1, padding: Spacing.lg, paddingBottom: Spacing.xxl },
+  scroll: { flexGrow: 1, padding: Spacing.lg, paddingBottom: Spacing.xxl, backgroundColor: Colors.bg },
   pageHeader: { marginBottom: Spacing.lg },
   pageTitle: {
     fontSize: Typography.xl,

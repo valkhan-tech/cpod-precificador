@@ -119,8 +119,8 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.bg },
-  scroll: { flexGrow: 1, paddingBottom: Spacing.xl },
+  safe: { flex: 1, backgroundColor: Colors.teal900 },
+  scroll: { flexGrow: 1, paddingBottom: Spacing.xl, backgroundColor: Colors.bg },
   hero: {
     alignItems: 'center',
     paddingTop: Spacing.xl,

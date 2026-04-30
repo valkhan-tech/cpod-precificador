@@ -1,327 +1,326 @@
-# cPod Precificador — App Mobile
+# cPod Precificador
 
-Aplicativo React Native / Expo para precificação de produtos e serviços. Ferramenta gratuita para empreendedores com três calculadoras integradas: **Precificador**, **Custo Serviços** e **Histórico de simulações**.
+> **Precifique com confiança** — Ferramenta gratuita para empreendedores que querem saber exatamente quanto cobrar.
 
----
-
-## Sumário
-
-- [Pré-requisitos](#pré-requisitos)
-- [Configuração do ambiente](#configuração-do-ambiente)
-- [Instalação do projeto](#instalação-do-projeto)
-- [Rodando o app](#rodando-o-app)
-- [Criando o app no Expo (EAS Build)](#criando-o-app-no-expo-eas-build)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Variáveis e constantes importantes](#variáveis-e-constantes-importantes)
-- [Camada de API (mock → produção)](#camada-de-api-mock--produção)
-- [Fluxo de autenticação](#fluxo-de-autenticação)
-- [Credenciais de teste](#credenciais-de-teste)
-- [Versões compatíveis](#versões-compatíveis)
+[![Versão](https://img.shields.io/badge/versão-0.1.0-teal)](https://cpod.com.br)
+[![Plataforma](https://img.shields.io/badge/plataforma-Android-green)](https://play.google.com/store)
+[![Gratuito](https://img.shields.io/badge/gratuito-sem%20anúncios-brightgreen)](https://cpod.com.br)
+[![cPod](https://img.shields.io/badge/ecossistema-cPod-purple)](https://cpod.com.br)
 
 ---
 
-## Pré-requisitos
+## Sobre o app
 
-| Ferramenta | Versão mínima | Observação |
-|---|---|---|
-| Node.js | 18+ | Recomendado LTS |
-| npm | 9+ | Vem com Node |
-| Android Studio | Ladybug (2024.2) | Emulador Android |
-| Xcode | 15+ | Apenas macOS — para iOS |
-| JDK | 17 | Para build Android |
+O **cPod Precificador** é a calculadora de preços do ecossistema [cPod](https://cpod.com.br). Desenvolvido para MEIs, autônomos, revendedores e prestadores de serviço que precisam calcular o preço ideal dos seus produtos e serviços — com base em custos reais, não em estimativas.
 
-> **Windows**: Android Studio + emulador é o caminho para desenvolvimento local. iOS só pode ser compilado em macOS.
+A maioria das calculadoras de preço ignora parte da cadeia de custos ou trata margem e markup como a mesma coisa. O cPod Precificador foi criado para resolver isso: mostra o cálculo completo, explica cada conceito e indica se o resultado é saudável para o seu negócio.
+
+Funciona **sem cadastro**, é **100% gratuito** e **sem anúncios**.
 
 ---
 
-## Configuração do ambiente
+## Funcionalidades
 
-### 1. Instalar Node.js
+### 🏷️ Precificador de Produtos
 
-Baixe em https://nodejs.org e instale a versão LTS.
+Calcule o preço ideal informando custo do produto, embalagem/custos indiretos, taxas de plataforma (marketplace, maquininha), impostos (percentual livre ou tabela MEI) e margem desejada. Funciona nos dois sentidos: **informe a margem → descubra o preço** ou **informe o preço → descubra a margem real**.
 
-### 2. Instalar Expo CLI (global — opcional, mas útil)
+Cada resultado vem acompanhado de indicadores visuais de saúde:
 
-```bash
-npm install -g eas-cli
+- 🔴 Risco (margem < 3%)
+- 🟡 Atenção (3–10%)
+- 🟢 Saudável (10–30%)
+- ✅ Ótimo (≥ 30%)
+
+### ⏱️ Calculadora de Custo de Serviços — Hora/Homem
+
+Para prestadores de serviço e empresas que trabalham com equipes. Adicione colaboradores com salário bruto, encargos trabalhistas e horas mensais. O app calcula o custo real por hora de cada um e sugere a taxa de cobrança que cobre todos os custos fixos e atinge a margem desejada. Suporta projeção por projeto e múltiplos colaboradores com ativação/desativação individual para simulações.
+
+### 📊 Funciona sem conta
+
+Todas as calculadoras funcionam imediatamente, sem necessidade de cadastro. Em versões futuras, crie uma conta gratuita para salvar simulações e acessar o simulador em lote para múltiplos produtos ao mesmo tempo.
+
+---
+
+## Para quem é
+
+| Perfil | Uso principal |
+| --------------------------------- | ----------------------------------------------------- |
+| MEI / Microempreendedor | Precificação com tabela de tributação MEI |
+| Revendedor / Lojista | Margem sobre custo de produto com taxas de plataforma |
+| Autônomo / Freelancer | Calcular quanto cobrar por hora de serviço |
+| Consultor / Prestador de serviço | Custo real da equipe e margem sobre serviços |
+| Pequenas empresas | Custo hora/homem com múltiplos colaboradores |
+
+---
+
+## Screenshots
+
+> _Capturas de tela serão adicionadas antes da publicação na Play Store._
+> As telas recomendadas para a listagem são: Welcome, Home, Precificador (com resultado), Custo Serviços (com colaboradores).
+
+---
+
+## Roadmap
+
+- [x] Calculadora de Precificação de Produtos
+- [x] Calculadora de Custo de Serviços (Hora/Homem)
+- [x] Experiência sem cadastro
+- [x] Publicação na Play Store
+- [ ] Conta gratuita + histórico de simulações (Portal cPod)
+- [ ] Simulador em lote — múltiplos produtos
+- [ ] Integração com backend cPod
+- [ ] Suporte a anúncios não invasivos (Google AdMob)
+- [ ] Compra in-app para desativar anúncios
+- [ ] Publicação na App Store (iOS)
+
+---
+
+## Sobre a cPod
+
+O **cPod** é um ecossistema de ferramentas modulares para empreendedores — criado pela [Valkhan Tech](https://valkhan.com.br). Use ferramentas independentes ou conecte tudo em um fluxo mais inteligente. Sem sistemas gigantes. Só o que você precisa.
+
+Acesse o ecossistema completo em **[cpod.com.br](https://cpod.com.br)**.
+
+**Suporte:** suporte@valkhan.com.br
+**Política de privacidade:** [cpod.com.br/privacidade](https://cpod.com.br/privacidade)
+
+---
+
+---
+
+## 📋 Listagem Google Play — Campos para publicação
+
+> Esta seção contém todos os campos necessários para cadastro e publicação na Google Play Store. Copie e cole diretamente no Google Play Console.
+
+---
+
+### Título do app
+```
+cPod Precificador
+```
+> 17 caracteres (limite: 30)
+
+---
+
+### Descrição curta
+```
+Calcule o preço ideal de produtos e serviços. Grátis, sem cadastro.
+```
+> 68 caracteres (limite: 80)
+
+**Alternativa A (foco no diferencial):**
+```
+Precificador completo para MEI e empreendedores. Sem anúncios.
+```
+> 62 caracteres
+
+**Alternativa B (foco na ação):**
+```
+Precifique com confiança. Margem, markup e impostos no mesmo app.
+```
+> 65 caracteres
+
+---
+
+### Descrição completa
+
+```
+Precifique com confiança — grátis, sem cadastro, sem anúncios.
+
+O cPod Precificador é a ferramenta gratuita para empreendedores, MEIs e profissionais autônomos que querem saber com precisão quanto cobrar pelos seus produtos e serviços.
+
+Chega de chute no preço. Chega de vender no prejuízo sem perceber.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+O QUE DIFERENCIA O cPod PRECIFICADOR?
+
+A maioria das calculadoras de preço ignora parte da cadeia de custos — ou mistura conceitos como margem e markup sem explicar a diferença. O cPod Precificador foi desenvolvido para mostrar o cálculo completo: do custo do produto ao imposto, das taxas de plataforma à margem real — para que você entenda exatamente de onde vem o preço final e o que cada componente representa no seu resultado.
+
+Mais do que calcular, o app explica. Cada resultado vem acompanhado de referências de saúde para os indicadores, para que você não só saiba o número, mas entenda se ele é bom para o seu negócio.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+CALCULADORAS DISPONÍVEIS
+
+🏷️ PRECIFICADOR DE PRODUTOS
+Calcule o preço ideal considerando: custo do produto, embalagem e custos indiretos, taxas de plataforma (marketplace, maquininha), impostos (percentual livre ou tabela MEI) e margem de lucro desejada.
+
+Funciona nos dois sentidos:
+→ Informe a margem para descobrir o preço ideal
+→ Informe o preço para descobrir a margem real
+
+Cada resultado mostra margem, markup, receita, impostos pagos e lucro líquido — com indicadores visuais de saúde do negócio.
+
+⏱️ CALCULADORA DE CUSTO DE SERVIÇOS — HORA/HOMEM
+Para prestadores de serviço, autônomos e empresas que trabalham com equipes. Adicione colaboradores com salário, encargos e horas mensais. O app calcula o custo real por hora e sugere a taxa de cobrança para cobrir todos os custos e atingir a margem desejada.
+
+→ Suporta múltiplos colaboradores
+→ Ative ou desative colaboradores para simulações
+→ Estimativa de custo por projeto
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+POR QUE USAR O cPod PRECIFICADOR?
+
+✅ 100% gratuito — sem compras, sem assinatura
+✅ Sem anúncios
+✅ Funciona sem criar conta — abra e use imediatamente
+✅ Desenvolvido para a realidade brasileira, com suporte à tributação MEI
+✅ Explica a diferença entre margem e markup
+✅ Indicadores visuais: risco, atenção, saudável e ótimo
+✅ Parte do ecossistema cPod — mais ferramentas em cpod.com.br
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+IDEAL PARA
+
+• Microempreendedores Individuais (MEI)
+• Revendedores e lojistas
+• Prestadores de serviço e autônomos
+• Freelancers e consultores
+• Pequenas empresas com equipe de serviço
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+EM BREVE
+
+Crie uma conta gratuita para salvar suas simulações e acessar o simulador em lote — precifique múltiplos produtos ao mesmo tempo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+
+O cPod Precificador faz parte do ecossistema cPod, criado pela Valkhan Tech.
+Acesse todas as ferramentas em cpod.com.br
+```
+> ~2.900 caracteres (limite: 4.000)
+
+---
+
+### Categoria
+```
+Negócios
+```
+> Alternativa: **Finanças**. Negócios é mais abrangente e alinha com o posicionamento de ferramenta de gestão. Finanças pode aumentar descoberta por público financeiro.
+
+---
+
+### Tags / Palavras-chave (ASO)
+```
+precificação, calculadora de preço, margem de lucro, markup, MEI, empreendedor, hora homem, custo de serviço, precificador, microempreendedor
+```
+> Use até 5 tags no console do Play. Prioridade: **precificação**, **MEI**, **margem de lucro**, **calculadora de preço**, **empreendedor**
+
+---
+
+### Classificação etária (IARC)
+```
+Livre para todos os públicos
+```
+> O questionário IARC deve ser preenchido no Play Console. Para este app (calculadora financeira, sem violência, sem conteúdo adulto) a classificação esperada é **Livre / Everyone**.
+
+---
+
+### Contato de suporte
+```
+suporte@valkhan.com.br
 ```
 
-### 3. Configurar Android Studio
+---
 
-1. Instale o Android Studio em https://developer.android.com/studio
-2. Abra o SDK Manager e instale:
-   - Android SDK Platform **35** (Android 15)
-   - Android SDK Build-Tools **35.0.0**
-   - Android Emulator
-3. Crie um Virtual Device (AVD):
-   - Device: **Pixel 8** (ou equivalente)
-   - System Image: **API 35 / x86_64**
-4. Adicione as variáveis de ambiente ao seu perfil (`~/.bashrc`, `~/.zshrc` ou variáveis de sistema no Windows):
+### URL da Política de Privacidade
+```
+https://cpod.com.br/privacidade
+```
+> ⚠️ Esta página precisa existir antes da submissão. Se ainda não estiver publicada, crie uma página simples informando: quais dados são coletados (e-mail, se o usuário criar conta), como são usados e que não são compartilhados com terceiros.
 
-```bash
-# Linux/macOS
-export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/platform-tools
+---
 
-# Windows (PowerShell — adicionar nas variáveis de sistema)
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+### Novidades (para o campo "O que há de novo" — v0.1.0)
+```
+Lançamento inicial do cPod Precificador.
+
+• Calculadora de precificação de produtos com suporte a MEI
+• Calculadora de custo de serviços e hora/homem com múltiplos colaboradores
+• Funciona sem cadastro
+• 100% gratuito, sem anúncios
 ```
 
 ---
 
-## Instalação do projeto
+### Assets necessários para publicação
+
+| Asset | Especificação | Status |
+| ------------------------- | ---------------------------------- | ----------------------------------------------------------- |
+| Ícone do app | 512×512 px, PNG, sem transparência | ✅ Disponível (`cpod-precificador-1024.png`) — redimensionar |
+| Feature Graphic | 1024×500 px, JPG ou PNG | ❌ Criar |
+| Screenshots (obrigatório) | Mín. 2, máx. 8 — telefone | ❌ Capturar do dispositivo |
+| Screenshots (tablet) | Opcional | — |
+| Vídeo de apresentação | Opcional (YouTube) | — |
+
+**Telas recomendadas para screenshots:**
+1. Welcome Screen — slide "Precifique com confiança"
+2. Home — tela com os cards das ferramentas
+3. Precificador — formulário preenchido com resultado expandido
+4. Precificador — resultado com indicador de margem
+5. Custo Serviços — tela com colaboradores e resultado
+
+---
+
+---
+
+## Desenvolvimento
+
+> Documentação técnica para contribuidores e desenvolvedores.
+
+### Stack
+
+- React Native 0.81.5 + Expo SDK 54
+- TypeScript 5.9
+- React Navigation v7 (Stack + Bottom Tabs)
+- EAS Build / EAS Submit
+
+### Setup rápido
 
 ```bash
-# 1. Clone o repositório
-git clone <url-do-repositorio>
-cd vlk-precificador/cpod-app
-
-# 2. Instale as dependências
 npm install
+npm run android   # Android (emulador)
+npm run ios       # iOS (apenas macOS)
 ```
 
-> ⚠️ **Importante**: sempre use `npm install` (não `npm install <pacote>` diretamente para pacotes nativos). Para adicionar novos pacotes do ecossistema Expo, use `npx expo install <pacote>` para garantir compatibilidade com o SDK 54.
-
----
-
-## Rodando o app
-
-### Android (emulador ou dispositivo físico)
+### Build de produção
 
 ```bash
-# Inicia o Metro Bundler e abre no emulador Android
-npm run android
-
-# Ou com a CLI local do Expo
-node node_modules/expo/bin/cli.js start --android
-```
-
-### iOS (apenas macOS)
-
-```bash
-npm run ios
-```
-
-### Modo interativo (escolher plataforma depois)
-
-```bash
-npm start
-# Pressione 'a' para Android, 'i' para iOS
-```
-
-### Dispositivo físico
-
-1. Instale o app **Expo Go** no celular (Play Store / App Store)
-2. Execute `npm start`
-3. Escaneie o QR code exibido no terminal
-
----
-
-## Criando o app no Expo (EAS Build)
-
-### 1. Login na conta Expo
-
-```bash
-npx eas-cli login
-```
-
-> Crie uma conta gratuita em https://expo.dev se ainda não tiver.
-
-### 2. Configurar o projeto no Expo
-
-```bash
-npx eas-cli init
-```
-
-Isso vai associar o projeto à sua conta e gerar/atualizar o `app.json` com o `projectId`.
-
-### 3. Configurar o `eas.json`
-
-Crie o arquivo `eas.json` na raiz do `cpod-app/`:
-
-```json
-{
-  "cli": {
-    "version": ">= 14.0.0"
-  },
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
-    "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "production": {
-      "autoIncrement": true
-    }
-  },
-  "submit": {
-    "production": {}
-  }
-}
-```
-
-### 4. Build de preview (APK para teste interno)
-
-```bash
-# Gera APK Android para distribuição interna
-npx eas-cli build --platform android --profile preview
-```
-
-O link para download do APK será exibido ao final do build.
-
-### 5. Build de produção
-
-```bash
-# Android (AAB para Google Play)
 npx eas-cli build --platform android --profile production
-
-# iOS (IPA para App Store)
-npx eas-cli build --platform ios --profile production
-```
-
-### 6. Submit para as lojas
-
-```bash
 npx eas-cli submit --platform android
-npx eas-cli submit --platform ios
 ```
 
----
-
-## Estrutura do projeto
+### Estrutura
 
 ```
-App.tsx                    # Ponto de entrada
-app.json                   # Configuração Expo (bundle ID, nome, splash)
-package.json
-tsconfig.json
-assets/                    # Ícone, splash, adaptive icon
 src/
-    ├── constants/
-    │   ├── theme.ts            # Design tokens (cores, tipografia, espaçamento)
-    │   └── api.ts              # URL base, endpoints, MAX_SIMULATIONS
-    ├── types/
-    │   └── api.types.ts        # Interfaces TypeScript (AuthUser, Simulation, etc.)
-    ├── services/
-    │   └── api.ts              # Camada de API com mocks (TODO: substituir por real)
-    ├── context/
-    │   └── AuthContext.tsx     # Estado de autenticação global + SecureStore
-    ├── components/
-    │   ├── Button.tsx          # Botão (variantes: primary, secondary, ghost)
-    │   ├── CpodLogo.tsx        # Logo SVG cPod (variantes: full, icon)
-    │   ├── InputField.tsx      # Input com label, prefix, suffix, erro
-    │   └── ResultCard.tsx      # Card de resultado com linhas coloridas
-    ├── screens/
-    │   ├── WelcomeScreen.tsx   # Onboarding com 3 slides animados
-    │   ├── LoginScreen.tsx     # Tela de login
-    │   ├── RegisterScreen.tsx  # Tela de cadastro
-    │   ├── HomeScreen.tsx      # Hub com cards de ferramentas
-    │   ├── PrecificadorScreen.tsx  # Calculadora de preços
-    │   ├── HoraHomemScreen.tsx     # Calculadora de custo servicos
-    │   └── HistoricoScreen.tsx     # Histórico de simulações salvas
-    └── navigation/
-        ├── types.ts            # Tipos das rotas (RootStack, MainTabs)
-        └── AppNavigator.tsx    # Stack + Bottom Tabs
+├── constants/     # theme.ts, api.ts
+├── components/    # Button, InputField, ResultCard, CpodLogo
+├── screens/       # WelcomeScreen, Home, Precificador, HoraHomem, Historico
+├── context/       # AuthContext (SecureStore)
+├── services/      # api.ts (mock → produção: substituir TODOs)
+└── navigation/    # AppNavigator, tipos de rota
 ```
 
----
+### Camada de API
 
-## Variáveis e constantes importantes
+Todas as chamadas estão em `src/services/api.ts` com mocks até o backend `api.cpod.com.br` estar disponível. Para ativar chamadas reais, substitua os blocos mock pelo helper `apiCall<T>()` documentado no arquivo.
 
-### `src/constants/api.ts`
+**Credenciais de teste (modo mock):**
+- E-mail: `demo@cpod.com.br` / Senha: `demo1234`
 
-```ts
-API_BASE_URL = 'https://api.cpod.com.br/v1'
-MAX_SIMULATIONS = 10      // limite de simulações salvas por usuário
-MOCK_DELAY_MS = 600       // delay simulado nas chamadas mock
-```
-
-### `src/constants/theme.ts`
-
-Paleta cPod baseada no `cpod.css`:
-
-| Token | Valor | Uso |
-|---|---|---|
-| `Colors.teal900` | `#071e1d` | Background principal |
-| `Colors.teal700` | `#1F5C59` | Primário / gradiente |
-| `Colors.purple` | `#C333F3` | Acento — Precificador |
-| `Colors.cyan` | `#33C3F3` | Acento — Serviços |
-| `Colors.mint` | `#33F3C3` | Acento — destaques |
-
----
-
-## Camada de API (mock → produção)
-
-Todas as chamadas de API estão em `src/services/api.ts`. Enquanto o backend `api.cpod.com.br` não está disponível, todas as funções retornam dados simulados com delay configurável.
-
-Para ativar uma chamada real, substitua o bloco mock pelo helper `apiCall<T>()` já documentado no arquivo. Cada função contém um comentário `// TODO: substituir por apiCall real`.
-
-**Funções disponíveis:**
-
-```ts
-login(email, password)           // POST /auth/login
-register(name, email, password)  // POST /auth/register
-logout()                         // POST /auth/logout
-getSimulations()                 // GET  /simulations
-saveSimulation(data)             // POST /simulations (max 10)
-deleteSimulation(id)             // DELETE /simulations/:id
-```
-
----
-
-## Fluxo de autenticação
-
-- **Sem login**: todas as calculadoras funcionam normalmente; simulações não são salvas
-- **Com login**: permite salvar até **10 simulações** no histórico
-- Tokens armazenados com `expo-secure-store` (Keychain/Keystore nativo — nunca AsyncStorage)
-- Chaves de storage: `cpod_access_token`, `cpod_refresh_token`, `cpod_user`
-- Sessão restaurada automaticamente ao abrir o app
-
----
-
-## Credenciais de teste
-
-Enquanto a API estiver no modo mock:
-
-| Campo | Valor |
-|---|---|
-| E-mail | `demo@cpod.com.br` |
-| Senha | `demo1234` |
-
-Qualquer outro e-mail/senha no cadastro também funciona no mock.
-
----
-
-## Versões compatíveis
+### Versões
 
 | Pacote | Versão |
-|---|---|
+| ------------ | ----------- |
 | Expo SDK | `~54.0.33` |
 | React Native | `0.81.5` |
 | React | `19.1.0` |
 | TypeScript | `~5.9.2` |
-| expo-linear-gradient | `~15.0.8` |
-| expo-secure-store | `~15.0.8` |
-| @react-native-async-storage/async-storage | `2.2.0` |
-| react-native-screens | `~4.16.0` |
-| react-native-safe-area-context | `~5.6.0` |
-| react-native-svg | `15.12.1` |
 
-> ⚠️ Não use `npm install <pacote>` para dependências nativas do Expo — sempre use `npx expo install <pacote>` para garantir a versão compatível com o SDK atual.
-
-## Checklist para implantação:
-
-- App Base: OK
-- Portal cPod para criação de contas e gerenciamento de simulações: Em desenvolvimento
-- Integração com backend real: Em espera
-- Publicação inicial na Play Store: Em espera
-- Adição de suporte para google ads pouco invasivo: Em espera
-- Criação de IAP para desativar anúncios: Em espera
-- Publicação na App Store: Em espera
-- Monitoramento de erros (Sentry): Em espera
+> Para adicionar pacotes nativos: `npx expo install <pacote>` (nunca `npm install` direto para garantir compatibilidade com o SDK).

@@ -561,7 +561,7 @@ export default function HoraHomemScreen() {
               />
 
               <View style={styles.actionRow}>
-                <Button title="💾 Salvar simulação" onPress={salvar} loading={saving} style={styles.actionBtnSave} />
+                {/* <Button title="💾 Salvar simulação" onPress={salvar} loading={saving} style={styles.actionBtnSave} /> */}
                 <Button title="Limpar" variant="neutral" onPress={() => setResults(null)} style={styles.actionBtnClear} />
               </View>
             </View>
@@ -573,9 +573,9 @@ export default function HoraHomemScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.bg },
+  safe: { flex: 1, backgroundColor: Colors.teal900 },
   flex: { flex: 1 },
-  scroll: { flexGrow: 1, padding: Spacing.lg, paddingBottom: Spacing.xxl },
+  scroll: { flexGrow: 1, padding: Spacing.lg, paddingBottom: Spacing.xxl, backgroundColor: Colors.bg },
   pageHeader: { marginBottom: Spacing.lg },
   pageTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.text, marginBottom: Spacing.xs },
   pageDesc: { fontSize: Typography.sm, color: Colors.muted, lineHeight: 20 },
