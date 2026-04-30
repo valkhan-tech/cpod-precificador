@@ -15,7 +15,7 @@ interface ButtonProps {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'neutral';
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
@@ -73,14 +73,28 @@ export default function Button({
   }
 
   // ghost
+  if (variant === 'ghost') {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        disabled={isDisabled}
+        activeOpacity={0.7}
+        style={[styles.ghost, isDisabled && styles.disabled, style]}
+      >
+        <Text style={[styles.textGhost, textStyle]}>{title}</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  // neutral
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.7}
-      style={[styles.ghost, isDisabled && styles.disabled, style]}
+      activeOpacity={0.8}
+      style={[styles.base, styles.neutral, isDisabled && styles.disabled, style]}
     >
-      <Text style={[styles.textGhost, textStyle]}>{title}</Text>
+      <Text style={[styles.textNeutral, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 }
@@ -128,6 +142,21 @@ const styles = StyleSheet.create({
   textGhost: {
     color: Colors.teal600,
     fontSize: Typography.sm,
+    fontWeight: Typography.medium,
+  },
+  neutral: {
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+    backgroundColor: Colors.bg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+  },
+  textNeutral: {
+    color: Colors.muted,
+    fontSize: Typography.base,
     fontWeight: Typography.medium,
   },
 });
