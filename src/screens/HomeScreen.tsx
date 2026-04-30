@@ -65,7 +65,7 @@ export default function HomeScreen() {
             Ferramenta gratuita para empreendedores precificarem melhor seus produtos e serviços.
           </Text>
 
-          {isAuthenticated ? (
+          {/* {isAuthenticated ? (
             <View style={styles.userBadge}>
               <Text style={styles.userBadgeText}>👋 Olá, {user?.name?.split(' ')[0]}</Text>
             </View>
@@ -78,7 +78,7 @@ export default function HomeScreen() {
                 💾 <Text style={styles.loginBannerBold}>Crie uma conta</Text> e salve até 10 simulações
               </Text>
             </TouchableOpacity>
-          )}
+          )} */}
         </LinearGradient>
 
         {/* Tools */}
@@ -108,9 +108,9 @@ export default function HomeScreen() {
           <Text style={styles.infoIcon}>ℹ️</Text>
           <Text style={styles.infoText}>
             Os cálculos são feitos localmente no seu dispositivo. 
-            {isAuthenticated
+            {/* {isAuthenticated
               ? ' Salve as simulações no histórico para reutilizar depois.'
-              : ' Crie uma conta para salvar e acessar seu histórico.'}
+              : ' Crie uma conta para salvar e acessar seu histórico.'} */}
           </Text>
         </View>
       </ScrollView>

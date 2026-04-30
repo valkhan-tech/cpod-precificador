@@ -43,13 +43,13 @@ const SLIDES: Slide[] = [
     description:
       'Acesse todas as calculadoras gratuitamente. Sem burocracia, sem surpresas — só resultados.',
   },
-  {
-    id: '3',
-    icon: '💾',
-    title: 'Salve suas\nsimulações',
-    description:
-      'Crie uma conta gratuita e salve até 10 simulações no histórico para reaproveitar sempre que precisar.',
-  },
+  // {
+  //   id: '3',
+  //   icon: '💾',
+  //   title: 'Salve suas\nsimulações',
+  //   description:
+  //     'Crie uma conta gratuita e salve até 10 simulações no histórico para reaproveitar sempre que precisar.',
+  // },
 ];
 
 export default function WelcomeScreen({ navigation }: Props) {
@@ -120,7 +120,7 @@ export default function WelcomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('Main')}
             style={styles.btnPrimary}
           />
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.btnLogin}
             onPress={() => navigation.navigate('Login')}
           >
@@ -128,7 +128,7 @@ export default function WelcomeScreen({ navigation }: Props) {
               Já tenho conta{' '}
               <Text style={styles.btnLoginAccent}>Entrar</Text>
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Disclaimer */}
