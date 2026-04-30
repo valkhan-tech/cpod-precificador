@@ -60,7 +60,7 @@ function MainTabs() {
         name="Precificador"
         component={PrecificadorScreen}
         options={{
-          title: "Preços",
+          title: "Produtos",
           tabBarIcon: ({ focused }) => <TabIcon emoji="🏷️" focused={focused} />,
         }}
       />
@@ -68,7 +68,7 @@ function MainTabs() {
         name="HoraHomem"
         component={HoraHomemScreen}
         options={{
-          title: "Hora-Homem",
+          title: "Serviços",
           tabBarIcon: ({ focused }) => <TabIcon emoji="⏱️" focused={focused} />,
         }}
       />

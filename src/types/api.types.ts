@@ -1,4 +1,4 @@
-export type SimulationType = 'precificador' | 'hora-homem' | 'lote';
+export type SimulationType = 'precificador' | 'servicos' | 'lote';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 export interface AuthUser {

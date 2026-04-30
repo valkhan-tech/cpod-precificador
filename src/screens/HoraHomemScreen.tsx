@@ -228,8 +228,8 @@ export default function HoraHomemScreen() {
     setSaving(true);
     try {
       await saveSimulation({
-        type: 'hora-homem',
-        title: `Hora-Homem — ${fmt(results.valorHoraSugerido)}/h sugerido`,
+        type: 'servicos',
+        title: `Serviços — ${fmt(results.valorHoraSugerido)}/h sugerido`,
         inputs: {
           colaboradores: JSON.stringify(colaboradores),
           custoFixo, margem, impostos, projecaoMeses, faturamentoExtra, antecipacaoLucros,
@@ -257,9 +257,9 @@ export default function HoraHomemScreen() {
       >
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.pageHeader}>
-            <Text style={styles.pageTitle}>⏱️ Custo Hora-Homem</Text>
+            <Text style={styles.pageTitle}>⏱️ Custo Serviços</Text>
             <Text style={styles.pageDesc}>
-              Calcule o custo real de hora-homem da sua equipe.
+              Calcule o custo real de servicos da sua equipe.
             </Text>
           </View>
 

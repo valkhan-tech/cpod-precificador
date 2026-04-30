@@ -26,7 +26,7 @@ type NavProp = NativeStackNavigationProp<RootStackParamList>;
 
 const TYPE_LABEL: Record<string, string> = {
   precificador: '🏷️ Precificador',
-  'hora-homem': '⏱️ Hora-Homem',
+  'servicos': '⏱️ Serviços',
   lote: '📦 Lote',
 };
 

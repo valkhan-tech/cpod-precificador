@@ -1,6 +1,6 @@
 # cPod Precificador — App Mobile
 
-Aplicativo React Native / Expo para precificação de produtos e serviços. Ferramenta gratuita para empreendedores com três calculadoras integradas: **Precificador**, **Custo Hora-Homem** e **Histórico de simulações**.
+Aplicativo React Native / Expo para precificação de produtos e serviços. Ferramenta gratuita para empreendedores com três calculadoras integradas: **Precificador**, **Custo Serviços** e **Histórico de simulações**.
 
 ---
 
@@ -223,7 +223,7 @@ src/
     │   ├── RegisterScreen.tsx  # Tela de cadastro
     │   ├── HomeScreen.tsx      # Hub com cards de ferramentas
     │   ├── PrecificadorScreen.tsx  # Calculadora de preços
-    │   ├── HoraHomemScreen.tsx     # Calculadora de custo hora-homem
+    │   ├── HoraHomemScreen.tsx     # Calculadora de custo servicos
     │   └── HistoricoScreen.tsx     # Histórico de simulações salvas
     └── navigation/
         ├── types.ts            # Tipos das rotas (RootStack, MainTabs)
@@ -251,7 +251,7 @@ Paleta cPod baseada no `cpod.css`:
 | `Colors.teal900` | `#071e1d` | Background principal |
 | `Colors.teal700` | `#1F5C59` | Primário / gradiente |
 | `Colors.purple` | `#C333F3` | Acento — Precificador |
-| `Colors.cyan` | `#33C3F3` | Acento — Hora-Homem |
+| `Colors.cyan` | `#33C3F3` | Acento — Serviços |
 | `Colors.mint` | `#33F3C3` | Acento — destaques |
 
 ---
