@@ -6,9 +6,12 @@ import { Text, View } from "react-native";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
+import PremiumScreen from "../screens/PremiumScreen";
+import ConfigPadraoScreen from "../screens/ConfigPadraoScreen";
 import HomeScreen from "../screens/HomeScreen";
 import PrecificadorScreen from "../screens/PrecificadorScreen";
 import HoraHomemScreen from "../screens/HoraHomemScreen";
+import GrupoCompraScreen from "../screens/GrupoCompraScreen";
 import HistoricoScreen from "../screens/HistoricoScreen";
 
 import { Colors, Typography } from "../constants/theme";
@@ -72,6 +75,14 @@ function MainTabs() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="⏱️" focused={focused} />,
         }}
       />
+      <Tab.Screen
+        name="GrupoCompra"
+        component={GrupoCompraScreen}
+        options={{
+          title: "Grupo",
+          tabBarIcon: ({ focused }) => <TabIcon emoji="🛒" focused={focused} />,
+        }}
+      />
       {/* <Tab.Screen
         name="Historico"
         component={HistoricoScreen}
@@ -94,6 +105,8 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
+      <Stack.Screen name="Premium" component={PremiumScreen} />
+      <Stack.Screen name="ConfigPadrao" component={ConfigPadraoScreen} />
     </Stack.Navigator>
   );
 }

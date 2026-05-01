@@ -1,10 +1,31 @@
-export type SimulationType = 'precificador' | 'servicos' | 'lote';
+export type SimulationType = 'precificador' | 'servicos' | 'lote' | 'grupo_compra';
+
+export type PlanoAssinatura = 'mensal' | 'anual';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
+  isPremium?: boolean; // controlado pelo backend; ausente = false
+}
+
+// ─── Assinatura ───────────────────────────────────────────────────────────────
+export interface Assinatura {
+  id: string;
+  userId: string;
+  plano: PlanoAssinatura;
+  ativo: boolean;
+  validoAte: string; // ISO date
+  valor: number;
+}
+
+export interface CheckoutRequest {
+  plano: PlanoAssinatura;
+}
+
+export interface CheckoutResponse {
+  checkoutUrl: string; // URL do gateway de pagamento (Stripe, etc.)
 }
 
 export interface AuthTokens {

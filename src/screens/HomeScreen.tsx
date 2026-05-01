@@ -101,18 +101,54 @@ export default function HomeScreen() {
               <Text style={styles.chevron}>›</Text>
             </TouchableOpacity>
           ))}
+
+          {/* Card Premium — Grupo de Compra */}
+          <TouchableOpacity
+            style={styles.toolCard}
+            onPress={() => tabNavigation.navigate('GrupoCompra' as any)}
+            activeOpacity={0.85}
+          >
+            <View style={[styles.toolIconBox, { backgroundColor: Colors.warning + '22' }]}>
+              <Text style={styles.toolIcon}>🛒</Text>
+            </View>
+            <View style={styles.toolInfo}>
+              <View style={styles.toolTitleRow}>
+                <Text style={styles.toolTitle}>Grupo de Compra</Text>
+                <View style={styles.premiumBadge}>
+                  <Text style={styles.premiumBadgeText}>PREMIUM</Text>
+                </View>
+              </View>
+              <Text style={styles.toolDesc}>
+                Rateie frete entre produtos, calcule custo real por peça e rentabilidade da compra.
+              </Text>
+            </View>
+            <Text style={styles.chevron}>›</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Info box */}
-        <View style={styles.infoBox}>
-          <Text style={styles.infoIcon}>ℹ️</Text>
-          <Text style={styles.infoText}>
-            Os cálculos são feitos localmente no seu dispositivo. 
-            {/* {isAuthenticated
-              ? ' Salve as simulações no histórico para reutilizar depois.'
-              : ' Crie uma conta para salvar e acessar seu histórico.'} */}
-          </Text>
+        {/* Premium promo card */}
+        <View style={styles.section}>
+          <LinearGradient
+            colors={[Colors.teal900, Colors.teal700]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.promoCard}
+          >
+            <Text style={styles.promoEmoji}>👑</Text>
+            <Text style={styles.promoTitle}>cPod Premium</Text>
+            <Text style={styles.promoDesc}>
+              Equipes salvas, valores padrão e muito mais para precificar com mais velocidade.
+            </Text>
+            <TouchableOpacity
+              style={styles.promoBtn}
+              onPress={() => navigation.navigate('Premium')}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.promoBtnText}>Ver benefícios →</Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -198,11 +234,24 @@ const styles = StyleSheet.create({
   },
   toolIcon: { fontSize: 26 },
   toolInfo: { flex: 1 },
+  toolTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, marginBottom: 2 },
   toolTitle: {
     fontSize: Typography.base,
     fontWeight: Typography.semibold,
     color: Colors.text,
     marginBottom: 2,
+  },
+  premiumBadge: {
+    backgroundColor: Colors.warning + '22',
+    borderRadius: Radius.full,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  premiumBadgeText: {
+    fontSize: 9,
+    fontWeight: Typography.bold,
+    color: Colors.warning,
+    letterSpacing: 0.5,
   },
   toolDesc: {
     fontSize: Typography.xs,
@@ -214,11 +263,38 @@ const styles = StyleSheet.create({
     color: Colors.subtle,
     marginLeft: Spacing.sm,
   },
+  promoCard: {
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+    alignItems: 'center',
+  },
+  promoEmoji: { fontSize: 36, marginBottom: Spacing.sm },
+  promoTitle: {
+    fontSize: Typography.lg,
+    fontWeight: Typography.bold,
+    color: Colors.white,
+    marginBottom: Spacing.xs,
+    textAlign: 'center',
+  },
+  promoDesc: {
+    fontSize: Typography.xs,
+    color: Colors.teal100,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: Spacing.md,
+  },
+  promoBtn: {
+    backgroundColor: Colors.white,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+  },
+  promoBtnText: {
+    color: Colors.teal700,
+    fontWeight: Typography.bold,
+    fontSize: Typography.sm,
+  },
   infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginHorizontal: Spacing.lg,
-    backgroundColor: Colors.teal50,
     borderRadius: Radius.md,
     padding: Spacing.md,
     gap: Spacing.sm,

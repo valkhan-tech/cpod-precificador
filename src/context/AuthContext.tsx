@@ -10,9 +10,11 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
+  hasPremium: boolean;
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
+  activatePremiumSession: () => void; // volátil: desativa ao reiniciar o app (apenas para testes)
 }
 
 const ACCESS_TOKEN_KEY = 'cpod_access_token';
@@ -27,6 +29,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading: true,
     isAuthenticated: false,
   });
+
+  // Volátil: não persiste entre reinicializações do app — exclusivo para testes
+  const [sessionPremium, setSessionPremium] = useState(false);
+
+  const activatePremiumSession = useCallback(() => {
+    setSessionPremium(true);
+  }, []);
 
   // Restaura sessão salva ao abrir o app
   useEffect(() => {
@@ -82,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, register, logout }}>
+    <AuthContext.Provider value={{ ...state, hasPremium: (state.user?.isPremium ?? false) || sessionPremium, login, register, logout, activatePremiumSession }}>
       {children}
     </AuthContext.Provider>
   );

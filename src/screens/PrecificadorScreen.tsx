@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,7 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import ResultCard from '../components/ResultCard';
 import { useAuth } from '../context/AuthContext';
-import { saveSimulation } from '../services/api';
+import { saveSimulation, fetchDefaultsProdutos } from '../services/api';
 import { Colors, Radius, Shadow, Spacing, Typography } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
 
@@ -46,7 +46,7 @@ interface Results {
 
 export default function PrecificadorScreen() {
   const navigation = useNavigation<NavProp>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasPremium, isLoading } = useAuth();
 
   const [nomeProduto, setNomeProduto] = useState('');
   const [custo, setCusto] = useState('');
@@ -58,6 +58,20 @@ export default function PrecificadorScreen() {
   const [precoVendaInput, setPrecoVendaInput] = useState('');
   const [quantidade, setQuantidade] = useState('1');
   const [modoImposto, setModoImposto] = useState<'percentual' | 'mei'>('percentual');
+
+  const defaultsApplied = useRef(false);
+  useEffect(() => {
+    if (isLoading || !hasPremium || defaultsApplied.current) return;
+    defaultsApplied.current = true;
+    fetchDefaultsProdutos().then((d) => {
+      if (d.custo) setCusto(d.custo);
+      if (d.embalagem) setEmbalagem(d.embalagem);
+      if (d.taxa) setTaxa(d.taxa);
+      if (d.imposto) setImposto(d.imposto);
+      if (d.margem) setMargem(d.margem);
+      if (d.quantidade) setQuantidade(d.quantidade);
+    });
+  }, [isLoading, hasPremium]);
   const [modoSimulacao, setModoSimulacao] = useState<'margem' | 'preco'>('margem');
   const [results, setResults] = useState<Results | null>(null);
   const [saving, setSaving] = useState(false);
@@ -151,10 +165,22 @@ export default function PrecificadorScreen() {
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           {/* Header */}
           <View style={styles.pageHeader}>
-            <Text style={styles.pageTitle}>🏷️ Precificador</Text>
-            <Text style={styles.pageDesc}>
-              Informe os dados do produto e calcule o preço ideal de venda.
-            </Text>
+            <View style={styles.pageHeaderRow}>
+              <View style={styles.pageHeaderText}>
+                <Text style={styles.pageTitle}>🏷️ Precificador</Text>
+                <Text style={styles.pageDesc}>
+                  Informe os dados do produto e calcule o preço ideal de venda.
+                </Text>
+              </View>
+              {hasPremium && (
+                <TouchableOpacity
+                  style={styles.gearBtn}
+                  onPress={() => navigation.navigate('ConfigPadrao')}
+                >
+                  <Text style={styles.gearBtnText}>⚙️</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* Formulário */}
@@ -456,6 +482,19 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   scroll: { flexGrow: 1, padding: Spacing.lg, paddingBottom: Spacing.xxl, backgroundColor: Colors.bg },
   pageHeader: { marginBottom: Spacing.lg },
+  pageHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  pageHeaderText: { flex: 1 },
+  gearBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: Spacing.sm,
+    ...Shadow.card,
+  },
+  gearBtnText: { fontSize: 18 },
   pageTitle: {
     fontSize: Typography.xl,
     fontWeight: Typography.bold,

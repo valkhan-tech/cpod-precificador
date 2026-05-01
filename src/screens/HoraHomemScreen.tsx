@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,9 +17,10 @@ import InputField from '../components/InputField';
 import Button from '../components/Button';
 import ResultCard from '../components/ResultCard';
 import { useAuth } from '../context/AuthContext';
-import { saveSimulation } from '../services/api';
+import { saveSimulation, getEquipesList, createEquipe, removeEquipe, fetchDefaultsHoraHomem } from '../services/api';
 import { Colors, Radius, Shadow, Spacing, Typography } from '../constants/theme';
 import { RootStackParamList } from '../navigation/types';
+import type { Equipe } from '../services/storage';
 
 const CARD_WIDTH = Dimensions.get('window').width - Spacing.lg * 2;
 
@@ -89,7 +90,7 @@ interface CalcResult {
 
 export default function HoraHomemScreen() {
   const navigation = useNavigation<NavProp>();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hasPremium, isLoading } = useAuth();
 
   const [colaboradores, setColaboradores] = useState<Colaborador[]>([
     { id: '1', nome: '', salario: '', encargos: '68', horasMes: '176', ativo: true },
@@ -103,6 +104,96 @@ export default function HoraHomemScreen() {
   const [faturamentoExtra, setFaturamentoExtra] = useState('');
   const [antecipacaoLucros, setAntecipacaoLucros] = useState('');
   const [horasProjeto, setHorasProjeto] = useState('');
+
+  // Equipes (Premium)
+  const [equipes, setEquipes] = useState<Equipe[]>([]);
+  const [showEquipesPanel, setShowEquipesPanel] = useState(false);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [nomeNovaEquipe, setNomeNovaEquipe] = useState('');
+  const [savingEquipe, setSavingEquipe] = useState(false);
+
+  const defaultsApplied = useRef(false);
+
+  // Carrega defaults premium uma única vez após autenticação
+  useEffect(() => {
+    if (isLoading || !hasPremium || defaultsApplied.current) return;
+    defaultsApplied.current = true;
+    fetchDefaultsHoraHomem().then((d) => {
+      if (d.custoFixo) setCustoFixo(d.custoFixo);
+      if (d.margem) setMargem(d.margem);
+      if (d.impostos) setImpostos(d.impostos);
+      if (d.encargosDefault || d.horasMesDefault) {
+        setColaboradores((prev) =>
+          prev.map((c) => ({
+            ...c,
+            encargos: d.encargosDefault || c.encargos,
+            horasMes: d.horasMesDefault || c.horasMes,
+          }))
+        );
+      }
+    });
+  }, [isLoading, hasPremium]);
+
+  // Carrega lista de equipes quando painel é aberto
+  useEffect(() => {
+    if (!showEquipesPanel || !hasPremium) return;
+    getEquipesList().then(setEquipes);
+  }, [showEquipesPanel, hasPremium]);
+
+  async function handleSaveEquipe() {
+    if (!nomeNovaEquipe.trim()) {
+      Alert.alert('Nome obrigatório', 'Informe um nome para a equipe.');
+      return;
+    }
+    setSavingEquipe(true);
+    try {
+      await createEquipe(nomeNovaEquipe.trim(), colaboradores);
+      const updated = await getEquipesList();
+      setEquipes(updated);
+      setNomeNovaEquipe('');
+      setShowSaveForm(false);
+      Alert.alert('Equipe salva!', `"${nomeNovaEquipe.trim()}" foi salva com sucesso.`);
+    } catch (e: unknown) {
+      Alert.alert('Erro', e instanceof Error ? e.message : 'Não foi possível salvar.');
+    } finally {
+      setSavingEquipe(false);
+    }
+  }
+
+  function handleLoadEquipe(eq: Equipe) {
+    Alert.alert(
+      'Carregar equipe',
+      `Substituir colaboradores atuais pela equipe "${eq.nome}"?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Carregar',
+          onPress: () => {
+            setColaboradores(
+              eq.colaboradores.map((c) => ({ ...c, id: String(Date.now() + Math.random()) }))
+            );
+            setActiveColabIndex(0);
+            setShowEquipesPanel(false);
+            setTimeout(() => colabScrollRef.current?.scrollTo({ x: 0, animated: false }), 50);
+          },
+        },
+      ]
+    );
+  }
+
+  function handleDeleteEquipe(id: string) {
+    Alert.alert('Remover equipe', 'Deseja remover esta equipe?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Remover',
+        style: 'destructive',
+        onPress: async () => {
+          await removeEquipe(id);
+          setEquipes((prev) => prev.filter((e) => e.id !== id));
+        },
+      },
+    ]);
+  }
 
   const [results, setResults] = useState<CalcResult | null>(null);
   const [saving, setSaving] = useState(false);
@@ -293,6 +384,100 @@ export default function HoraHomemScreen() {
             <Text style={styles.pageDesc}>
               Calcule o custo real de servicos da sua equipe.
             </Text>
+          </View>
+
+          {/* ── Painel de Equipes (Premium) ───────────────── */}
+          <View style={styles.equipesPainelWrap}>
+            <TouchableOpacity
+              style={styles.equipesPainelHeader}
+              onPress={() => setShowEquipesPanel((v) => !v)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.equipesPainelTitle}>⚡ Equipes Salvas</Text>
+              {hasPremium ? (
+                <Text style={styles.equipesPainelBadge}>{equipes.length} salvas</Text>
+              ) : (
+                <View style={styles.premiumBadgeSmall}>
+                  <Text style={styles.premiumBadgeSmallText}>PREMIUM</Text>
+                </View>
+              )}
+              <Text style={styles.equipesPainelArrow}>{showEquipesPanel ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+
+            {showEquipesPanel && (
+              <View style={styles.equipesPainelBody}>
+                {!hasPremium ? (
+                  <View style={styles.equipeGate}>
+                    <Text style={styles.equipeGateText}>
+                      Salve e carregue equipes com um clique.{'\n'}Disponível no plano Premium.
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.equipeGateBtn}
+                      onPress={() => navigation.navigate('Premium')}
+                    >
+                      <Text style={styles.equipeGateBtnText}>Ver benefícios →</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <>
+                    {equipes.length === 0 && !showSaveForm && (
+                      <Text style={styles.equipesEmpty}>Nenhuma equipe salva ainda.</Text>
+                    )}
+                    {equipes.map((eq) => (
+                      <View key={eq.id} style={styles.equipeRow}>
+                        <TouchableOpacity
+                          style={styles.equipeRowMain}
+                          onPress={() => handleLoadEquipe(eq)}
+                        >
+                          <Text style={styles.equipeRowNome}>{eq.nome}</Text>
+                          <Text style={styles.equipeRowInfo}>
+                            {eq.colaboradores.length} colaborador{eq.colaboradores.length !== 1 ? 'es' : ''}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.equipeDeleteBtn}
+                          onPress={() => handleDeleteEquipe(eq.id)}
+                        >
+                          <Text style={styles.equipeDeleteBtnText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+
+                    {showSaveForm ? (
+                      <View style={styles.equipeSaveForm}>
+                        <InputField
+                          label="Nome da equipe"
+                          placeholder="Ex: Equipe Front-end"
+                          value={nomeNovaEquipe}
+                          onChangeText={setNomeNovaEquipe}
+                        />
+                        <View style={styles.equipeSaveFormActions}>
+                          <Button
+                            title="Salvar"
+                            onPress={handleSaveEquipe}
+                            loading={savingEquipe}
+                            style={styles.equipeSaveBtn}
+                          />
+                          <Button
+                            title="Cancelar"
+                            variant="neutral"
+                            onPress={() => { setShowSaveForm(false); setNomeNovaEquipe(''); }}
+                            style={styles.equipeCancelBtn}
+                          />
+                        </View>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.equipeSaveNewBtn}
+                        onPress={() => setShowSaveForm(true)}
+                      >
+                        <Text style={styles.equipeSaveNewBtnText}>💾 Salvar equipe atual</Text>
+                      </TouchableOpacity>
+                    )}
+                  </>
+                )}
+              </View>
+            )}
           </View>
 
           {/* ── Colaboradores ─────────────────────────────── */}
@@ -579,6 +764,79 @@ const styles = StyleSheet.create({
   pageHeader: { marginBottom: Spacing.lg },
   pageTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.text, marginBottom: Spacing.xs },
   pageDesc: { fontSize: Typography.sm, color: Colors.muted, lineHeight: 20 },
+
+  // ── Equipes panel
+  equipesPainelWrap: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
+    ...Shadow.card,
+  },
+  equipesPainelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  equipesPainelTitle: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.text, flex: 1 },
+  equipesPainelBadge: { fontSize: Typography.xs, color: Colors.muted },
+  equipesPainelArrow: { fontSize: Typography.xs, color: Colors.muted },
+  premiumBadgeSmall: {
+    backgroundColor: Colors.warning + '22',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+  },
+  premiumBadgeSmallText: {
+    fontSize: 9,
+    fontWeight: Typography.bold,
+    color: Colors.warning,
+    letterSpacing: 0.5,
+  },
+  equipesPainelBody: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  equipeGate: { alignItems: 'center', paddingVertical: Spacing.sm },
+  equipeGateText: { fontSize: Typography.xs, color: Colors.muted, textAlign: 'center', lineHeight: 18, marginBottom: Spacing.sm },
+  equipeGateBtn: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    backgroundColor: Colors.teal700,
+    borderRadius: Radius.md,
+  },
+  equipeGateBtnText: { color: Colors.white, fontSize: Typography.xs, fontWeight: Typography.bold },
+  equipesEmpty: { fontSize: Typography.xs, color: Colors.muted, textAlign: 'center', paddingVertical: Spacing.sm },
+  equipeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.bg,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.xs,
+  },
+  equipeRowMain: { flex: 1, padding: Spacing.sm },
+  equipeRowNome: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.text },
+  equipeRowInfo: { fontSize: Typography.xs, color: Colors.muted },
+  equipeDeleteBtn: { padding: Spacing.sm, paddingHorizontal: Spacing.md },
+  equipeDeleteBtnText: { color: Colors.danger, fontSize: Typography.sm },
+  equipeSaveForm: { gap: Spacing.sm },
+  equipeSaveFormActions: { flexDirection: 'row', gap: Spacing.sm },
+  equipeSaveBtn: { flex: 65 },
+  equipeCancelBtn: { flex: 25 },
+  equipeSaveNewBtn: {
+    height: 40,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.teal600,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.xs,
+  },
+  equipeSaveNewBtnText: { fontSize: Typography.xs, color: Colors.teal700, fontWeight: Typography.semibold },
+
   card: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.lg, marginBottom: Spacing.md, ...Shadow.card },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
   cardHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },

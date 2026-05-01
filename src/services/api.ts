@@ -5,8 +5,8 @@
  * Enquanto o backend não está disponível, todas as funções retornam
  * dados mock após um delay simulado, documentando o contrato esperado.
  *
- * Contrato de Request/Response:
- * ─────────────────────────────
+ * ─── Contratos de Request/Response ───────────────────────────────────────────
+ *
  * POST /auth/login
  *   body:    { email: string, password: string }
  *   200:     { user: AuthUser, tokens: AuthTokens }
@@ -34,6 +34,51 @@
  * DELETE /simulations/:id
  *   headers: Authorization: Bearer <accessToken>
  *   204:     (no body)
+ *
+ * ─── Endpoints Premium ────────────────────────────────────────────────────────
+ *
+ * GET /equipes                       [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   200:     { equipes: Equipe[] }
+ *
+ * POST /equipes                      [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   body:    { nome: string, colaboradores: EquipeColaborador[] }
+ *   201:     Equipe
+ *   403:     { code: "PREMIUM_REQUIRED", message: "..." }
+ *   403:     { code: "LIMIT_REACHED", message: "Limite de 20 equipes atingido." }
+ *
+ * DELETE /equipes/:id                [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   204:     (no body)
+ *
+ * GET /config/defaults/produtos      [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   200:     DefaultsProdutos
+ *
+ * PUT /config/defaults/produtos      [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   body:    DefaultsProdutos
+ *   200:     DefaultsProdutos
+ *
+ * GET /config/defaults/hora_homem    [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   200:     DefaultsHoraHomem
+ *
+ * PUT /config/defaults/hora_homem    [Premium]
+ *   headers: Authorization: Bearer <accessToken>
+ *   body:    DefaultsHoraHomem
+ *   200:     DefaultsHoraHomem
+ *
+ * GET /assinaturas/status
+ *   headers: Authorization: Bearer <accessToken>
+ *   200:     { assinatura: Assinatura | null }
+ *
+ * POST /assinaturas/checkout
+ *   headers: Authorization: Bearer <accessToken>
+ *   body:    { plano: PlanoAssinatura }
+ *   200:     { checkoutUrl: string }   ← URL para gateway de pagamento (Stripe, etc.)
+ *   400:     { code: "ALREADY_SUBSCRIBED", message: "..." }
  */
 
 import {
@@ -44,12 +89,29 @@ import {
 } from '../constants/api';
 import {
   AuthResponse,
+  Assinatura,
+  CheckoutRequest,
+  CheckoutResponse,
   LoginRequest,
+  PlanoAssinatura,
   RegisterRequest,
   SaveSimulationRequest,
   Simulation,
   SimulationListResponse,
 } from '../types/api.types';
+import {
+  getEquipes as storageGetEquipes,
+  saveEquipe as storageSaveEquipe,
+  deleteEquipe as storageDeleteEquipe,
+  getDefaultsProdutos as storageGetDefaultsProdutos,
+  saveDefaultsProdutos as storageSaveDefaultsProdutos,
+  getDefaultsHoraHomem as storageGetDefaultsHoraHomem,
+  saveDefaultsHoraHomem as storageSaveDefaultsHoraHomem,
+  Equipe,
+  EquipeColaborador,
+  DefaultsProdutos,
+  DefaultsHoraHomem,
+} from './storage';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -165,4 +227,67 @@ export async function deleteSimulation(id: string): Promise<void> {
   await delay(MOCK_DELAY_MS);
   const idx = MOCK_SIMULATIONS.findIndex((s) => s.id === id);
   if (idx !== -1) MOCK_SIMULATIONS.splice(idx, 1);
+}
+
+// ─── Equipes (Premium) ────────────────────────────────────────────────────────
+
+export async function getEquipesList(): Promise<Equipe[]> {
+  // TODO: return apiCall<{ equipes: Equipe[] }>(ENDPOINTS.equipes).then(r => r.equipes);
+  await delay(MOCK_DELAY_MS);
+  return storageGetEquipes();
+}
+
+export async function createEquipe(nome: string, colaboradores: EquipeColaborador[]): Promise<Equipe> {
+  // TODO: return apiCall<Equipe>(ENDPOINTS.equipes, { method: 'POST', body: JSON.stringify({ nome, colaboradores }) });
+  await delay(MOCK_DELAY_MS);
+  return storageSaveEquipe(nome, colaboradores);
+}
+
+export async function removeEquipe(id: string): Promise<void> {
+  // TODO: await apiCall<void>(ENDPOINTS.equipeById(id), { method: 'DELETE' });
+  await delay(MOCK_DELAY_MS);
+  return storageDeleteEquipe(id);
+}
+
+// ─── Configurações Padrão (Premium) ──────────────────────────────────────────
+
+export async function fetchDefaultsProdutos(): Promise<DefaultsProdutos> {
+  // TODO: return apiCall<DefaultsProdutos>(ENDPOINTS.defaultsProdutos);
+  await delay(MOCK_DELAY_MS);
+  return storageGetDefaultsProdutos();
+}
+
+export async function updateDefaultsProdutos(d: DefaultsProdutos): Promise<DefaultsProdutos> {
+  // TODO: return apiCall<DefaultsProdutos>(ENDPOINTS.defaultsProdutos, { method: 'PUT', body: JSON.stringify(d) });
+  await delay(MOCK_DELAY_MS);
+  await storageSaveDefaultsProdutos(d);
+  return d;
+}
+
+export async function fetchDefaultsHoraHomem(): Promise<DefaultsHoraHomem> {
+  // TODO: return apiCall<DefaultsHoraHomem>(ENDPOINTS.defaultsHoraHomem);
+  await delay(MOCK_DELAY_MS);
+  return storageGetDefaultsHoraHomem();
+}
+
+export async function updateDefaultsHoraHomem(d: DefaultsHoraHomem): Promise<DefaultsHoraHomem> {
+  // TODO: return apiCall<DefaultsHoraHomem>(ENDPOINTS.defaultsHoraHomem, { method: 'PUT', body: JSON.stringify(d) });
+  await delay(MOCK_DELAY_MS);
+  await storageSaveDefaultsHoraHomem(d);
+  return d;
+}
+
+// ─── Assinatura (Premium) ─────────────────────────────────────────────────────
+
+export async function getAssinaturaStatus(): Promise<Assinatura | null> {
+  // TODO: return apiCall<{ assinatura: Assinatura | null }>(ENDPOINTS.assinaturaStatus).then(r => r.assinatura);
+  await delay(MOCK_DELAY_MS);
+  return null; // mock: nenhuma assinatura ativa
+}
+
+export async function initiateCheckout(plano: PlanoAssinatura): Promise<CheckoutResponse> {
+  // TODO: return apiCall<CheckoutResponse>(ENDPOINTS.assinaturaCheckout, { method: 'POST', body: JSON.stringify({ plano }) });
+  await delay(MOCK_DELAY_MS);
+  // Mock: retorna uma URL simulada (em produção seria Stripe, etc.)
+  return { checkoutUrl: `https://checkout.cpod.com.br/${plano}?mock=true` };
 }
