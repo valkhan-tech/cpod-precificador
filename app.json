@@ -7,12 +7,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#071e1d"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "br.com.cpod.precificador"
@@ -23,17 +17,28 @@
         "backgroundColor": "#071e1d"
       },
       "package": "br.com.cpod.precificador",
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-     },
+    },
     "extra": {
       "eas": {
         "projectId": "7fa05d4f-58a2-4204-938b-c5b3a43228d9"
       }
     },
-    "owner": "valkhan-tech"
+    "owner": "valkhan-tech",
+    "plugins": [
+      "expo-secure-store",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#071e1d"
+        }
+      ]
+    ]
   }
 }

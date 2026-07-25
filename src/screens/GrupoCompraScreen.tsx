@@ -702,7 +702,7 @@ export default function GrupoCompraScreen() {
                       {
                         label: '  Lucro do Produto',
                         value: fmt(p.lucro),
-                        accent: (p.lucro >= 0 ? 'success' : 'danger') as const,
+                        accent: p.lucro >= 0 ? ('success' as const) : ('danger' as const),
                       },
                     ])}
                   />

@@ -15,6 +15,8 @@ interface InputFieldProps extends TextInputProps {
   prefix?: string;
   suffix?: string;
   error?: string;
+  min?: number;
+  max?: number;
 }
 
 export default function InputField({
@@ -24,6 +26,8 @@ export default function InputField({
   suffix,
   error,
   style,
+  min,
+  max,
   ...props
 }: InputFieldProps) {
   const [focused, setFocused] = useState(false);
