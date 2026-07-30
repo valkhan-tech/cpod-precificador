@@ -23,6 +23,9 @@ export const ENDPOINTS = {
 export const MAX_SIMULATIONS = 10;
 export const MAX_EQUIPES = 20;
 
+export const WAITLIST_WEBHOOK_URL =
+  'https://101.valkhantech.com.br/webhook/73f5e10a-4434-4899-b411-6b2b828c87c2';
+
 // ─── Planos de assinatura ─────────────────────────────────────────────────────
 export const PLANOS = {
   mensal: { label: 'Mensal', valor: 9.90, periodo: '/ mês' },

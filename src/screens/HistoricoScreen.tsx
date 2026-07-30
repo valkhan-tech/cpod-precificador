@@ -130,17 +130,12 @@ export default function HistoricoScreen() {
           <Text style={styles.emptyIcon}>💾</Text>
           <Text style={styles.emptyTitle}>Histórico indisponível</Text>
           <Text style={styles.emptyDesc}>
-            Crie uma conta gratuita para salvar e acessar até {MAX_SIMULATIONS} simulações.
+            Salvar e acessar até {MAX_SIMULATIONS} simulações é um recurso do cPod Premium, em breve disponível.
           </Text>
           <Button
-            title="Criar conta"
-            onPress={() => navigation.navigate('Register')}
+            title="Ver detalhes do Premium"
+            onPress={() => navigation.navigate('Premium')}
             style={styles.emptyBtn}
-          />
-          <Button
-            title="Já tenho conta — Entrar"
-            variant="secondary"
-            onPress={() => navigation.navigate('Login')}
           />
         </View>
       </SafeAreaView>

@@ -6,16 +6,16 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useAuth } from '../context/AuthContext';
-import { initiateCheckout } from '../services/api';
+import InputField from '../components/InputField';
+import { joinWaitlist } from '../services/api';
 import { Colors, Radius, Shadow, Spacing, Typography } from '../constants/theme';
-import { PlanoAssinatura } from '../types/api.types';
-import { PLANOS } from '../constants/api';
 import { RootStackParamList } from '../navigation/types';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -29,196 +29,170 @@ const BENEFICIOS = [
   { icon: '🔄', titulo: 'Sincronização', desc: 'Acesse seus dados em qualquer dispositivo.' },
 ];
 
+const PRECOS = [9.9, 19.9, 29.9];
+
 function fmt(v: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 }
 
 export default function PremiumScreen() {
   const navigation = useNavigation<NavProp>();
-  const { hasPremium, isAuthenticated, activatePremiumSession } = useAuth();
-  const [planoSelecionado, setPlanoSelecionado] = useState<PlanoAssinatura>('anual');
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [precoSelecionado, setPrecoSelecionado] = useState<number>(PRECOS[1]);
   const [loading, setLoading] = useState(false);
+  const [enviado, setEnviado] = useState(false);
 
-  async function handleAssinar() {
-    if (!isAuthenticated) {
-      Alert.alert(
-        'Conta necessária',
-        'Crie uma conta gratuita para assinar o plano premium.',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Criar conta', onPress: () => navigation.navigate('Register') },
-        ]
-      );
+  function validar(): string | null {
+    if (!nome.trim()) return 'Informe seu nome.';
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return 'Informe um e-mail válido.';
+    return null;
+  }
+
+  async function handleEnviar() {
+    const erro = validar();
+    if (erro) {
+      Alert.alert('Verifique os dados', erro);
       return;
     }
 
     setLoading(true);
     try {
-      const { checkoutUrl } = await initiateCheckout(planoSelecionado);
-      // TODO: abrir checkoutUrl em um WebView ou browser externo (expo-web-browser)
-      Alert.alert(
-        'Redirecionando para o pagamento',
-        `URL do checkout: ${checkoutUrl}\n\n(Integração com gateway de pagamento em desenvolvimento.)`,
-        [{ text: 'OK' }]
-      );
+      await joinWaitlist({ name: nome.trim(), email: email.trim(), price: precoSelecionado });
+      setEnviado(true);
     } catch (e: unknown) {
-      Alert.alert('Erro', e instanceof Error ? e.message : 'Não foi possível iniciar o checkout.');
+      Alert.alert('Erro', 'Não foi possível enviar seu cadastro. Tente novamente.');
     } finally {
       setLoading(false);
     }
   }
 
-  function handleAtivarTeste() {
-    Alert.alert(
-      '🧪 Modo de Teste',
-      'O acesso premium será ativado apenas nesta sessão.\nAo reiniciar o app, voltará ao modo gratuito.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Ativar',
-          onPress: () => {
-            activatePremiumSession();
-            navigation.goBack();
-          },
-        },
-      ]
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.fill}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header */}
-        <LinearGradient colors={[Colors.teal900, Colors.teal700]} style={styles.hero}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.backBtnText}>← Voltar</Text>
-          </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Header */}
+          <LinearGradient colors={[Colors.teal900, Colors.teal700]} style={styles.hero}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+              <Text style={styles.backBtnText}>← Voltar</Text>
+            </TouchableOpacity>
 
-          <Text style={styles.crownEmoji}>👑</Text>
-          <Text style={styles.heroTitle}>cPod Premium</Text>
-          <Text style={styles.heroSub}>
-            Acesso completo a todas as ferramentas para precificar com mais precisão e eficiência.
-          </Text>
-
-          {hasPremium && (
-            <View style={styles.ativoBadge}>
-              <Text style={styles.ativoBadgeText}>✅ Premium ativo nesta sessão</Text>
-            </View>
-          )}
-        </LinearGradient>
-
-        {/* Benefícios */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>O que você ganha</Text>
-          <View style={styles.beneficiosGrid}>
-            {BENEFICIOS.map((b) => (
-              <View key={b.titulo} style={styles.beneficioCard}>
-                <Text style={styles.beneficioIcon}>{b.icon}</Text>
-                <Text style={styles.beneficioTitulo}>{b.titulo}</Text>
-                <Text style={styles.beneficioDesc}>{b.desc}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Planos */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Escolha seu plano</Text>
-
-          {(['anual', 'mensal'] as PlanoAssinatura[]).map((plano) => {
-            const p = PLANOS[plano];
-            const selecionado = planoSelecionado === plano;
-            return (
-              <TouchableOpacity
-                key={plano}
-                style={[styles.planoCard, selecionado && styles.planoCardSelecionado]}
-                onPress={() => setPlanoSelecionado(plano)}
-                activeOpacity={0.85}
-              >
-                <View style={styles.planoRadio}>
-                  <View style={[styles.radioCircle, selecionado && styles.radioCircleActive]}>
-                    {selecionado && <View style={styles.radioDot} />}
-                  </View>
-                </View>
-                <View style={styles.planoInfo}>
-                  <View style={styles.planoTitleRow}>
-                    <Text style={[styles.planoLabel, selecionado && styles.planoLabelActive]}>
-                      {p.label}
-                    </Text>
-                    {'economia' in p && (
-                      <View style={styles.economiaBadge}>
-                        <Text style={styles.economiaBadgeText}>{p.economia}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.planoValor}>
-                    <Text style={styles.planoValorNum}>{fmt(p.valor)}</Text>
-                    <Text style={styles.planoPeriodo}> {p.periodo}</Text>
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-
-          <TouchableOpacity
-            style={[styles.assinarBtn, loading && styles.assinarBtnLoading]}
-            onPress={handleAssinar}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            <LinearGradient
-              colors={[Colors.teal500, Colors.teal700]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.assinarBtnGradient}
-            >
-              <Text style={styles.assinarBtnText}>
-                {loading ? 'Aguarde...' : `Assinar plano ${PLANOS[planoSelecionado].label}`}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <Text style={styles.cancelInfo}>
-            Cancele quando quiser. Sem fidelidade.
-          </Text>
-        </View>
-
-        {/* Divisor */}
-        <View style={styles.divisor} />
-
-        {/* Modo Teste */}
-        <View style={styles.section}>
-          <View style={styles.testeCard}>
-            <Text style={styles.testeIcon}>🧪</Text>
-            <View style={styles.testeInfo}>
-              <Text style={styles.testeTitulo}>Modo de Teste</Text>
-              <Text style={styles.testeDesc}>
-                Ativa o acesso premium apenas nesta sessão.{'\n'}
-                Ao reiniciar o app, o acesso é desativado automaticamente.
-              </Text>
-            </View>
-          </View>
-          <TouchableOpacity
-            style={[styles.testeBtn, hasPremium && styles.testeBtnAtivo]}
-            onPress={hasPremium ? undefined : handleAtivarTeste}
-            disabled={hasPremium}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.testeBtnText}>
-              {hasPremium ? '✅ Modo de teste ativo' : 'Ativar modo de teste'}
+            <Text style={styles.crownEmoji}>👑</Text>
+            <Text style={styles.heroTitle}>cPod Premium</Text>
+            <Text style={styles.heroSub}>
+              Acesso completo a todas as ferramentas para precificar com mais precisão e eficiência.
             </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          </LinearGradient>
+
+          {/* Benefícios */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>O que você vai ganhar</Text>
+            <View style={styles.beneficiosGrid}>
+              {BENEFICIOS.map((b) => (
+                <View key={b.titulo} style={styles.beneficioCard}>
+                  <Text style={styles.beneficioIcon}>{b.icon}</Text>
+                  <Text style={styles.beneficioTitulo}>{b.titulo}</Text>
+                  <Text style={styles.beneficioDesc}>{b.desc}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Divisor */}
+          <View style={styles.divisor} />
+
+          {/* Lista de espera */}
+          <View style={styles.section}>
+            {enviado ? (
+              <View style={styles.sucessoCard}>
+                <Text style={styles.sucessoIcon}>🎉</Text>
+                <Text style={styles.sucessoTitulo}>Você entrou na lista!</Text>
+                <Text style={styles.sucessoDesc}>
+                  Assim que o cPod Premium estiver disponível, avisaremos você em primeira mão por e-mail.
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.sectionTitle}>Quero entrar na lista de espera</Text>
+                <Text style={styles.sectionDesc}>
+                  O cPod Premium ainda está em desenvolvimento. Deixe seus dados e nos conte
+                  quanto você pagaria por mês para usar esses benefícios.
+                </Text>
+
+                <InputField
+                  label="Nome"
+                  placeholder="Seu nome"
+                  value={nome}
+                  onChangeText={setNome}
+                  autoCapitalize="words"
+                />
+                <InputField
+                  label="E-mail"
+                  placeholder="voce@email.com"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+
+                <Text style={styles.precoLabel}>Quanto você pagaria por mês?</Text>
+                <View style={styles.precoOpcoes}>
+                  {PRECOS.map((preco) => {
+                    const selecionado = precoSelecionado === preco;
+                    return (
+                      <TouchableOpacity
+                        key={preco}
+                        style={[styles.precoCard, selecionado && styles.precoCardSelecionado]}
+                        onPress={() => setPrecoSelecionado(preco)}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={[styles.precoValor, selecionado && styles.precoValorSelecionado]}>
+                          {fmt(preco)}
+                        </Text>
+                        <Text style={[styles.precoPeriodo, selecionado && styles.precoPeriodoSelecionado]}>
+                          /mês
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.enviarBtn, loading && styles.enviarBtnLoading]}
+                  onPress={handleEnviar}
+                  disabled={loading}
+                  activeOpacity={0.85}
+                >
+                  <LinearGradient
+                    colors={[Colors.teal500, Colors.teal700]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.enviarBtnGradient}
+                  >
+                    <Text style={styles.enviarBtnText}>
+                      {loading ? 'Enviando...' : 'Quero entrar na lista de espera'}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.teal900 },
+  fill: { flex: 1 },
   scroll: { flexGrow: 1, backgroundColor: Colors.bg, paddingBottom: Spacing.xxl },
 
   hero: {
@@ -243,27 +217,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  ativoBadge: {
-    marginTop: Spacing.md,
-    backgroundColor: Colors.success + '33',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderWidth: 1,
-    borderColor: Colors.success + '66',
-  },
-  ativoBadgeText: {
-    color: Colors.success,
-    fontSize: Typography.xs,
-    fontWeight: Typography.semibold,
-  },
 
   section: { padding: Spacing.lg },
   sectionTitle: {
     fontSize: Typography.md,
     fontWeight: Typography.bold,
     color: Colors.text,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  sectionDesc: {
+    fontSize: Typography.sm,
+    color: Colors.muted,
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
   },
 
   beneficiosGrid: { gap: Spacing.sm },
@@ -286,133 +252,84 @@ const styles = StyleSheet.create({
   },
   beneficioDesc: { fontSize: Typography.xs, color: Colors.muted, lineHeight: 17, flex: 1 },
 
-  planoCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
-    marginBottom: Spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.border,
-    ...Shadow.card,
-  },
-  planoCardSelecionado: {
-    borderColor: Colors.teal600,
-    backgroundColor: Colors.teal50,
-  },
-  planoRadio: { marginRight: Spacing.md },
-  radioCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioCircleActive: { borderColor: Colors.teal600 },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.teal600,
-  },
-  planoInfo: { flex: 1 },
-  planoTitleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginBottom: 2 },
-  planoLabel: {
-    fontSize: Typography.base,
-    fontWeight: Typography.semibold,
-    color: Colors.muted,
-  },
-  planoLabelActive: { color: Colors.teal700 },
-  economiaBadge: {
-    backgroundColor: Colors.success + '22',
-    borderRadius: Radius.full,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-  },
-  economiaBadgeText: {
-    fontSize: 10,
-    color: Colors.success,
-    fontWeight: Typography.bold,
-  },
-  planoValor: { marginTop: 2 },
-  planoValorNum: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.bold,
-    color: Colors.text,
-  },
-  planoPeriodo: {
-    fontSize: Typography.sm,
-    color: Colors.muted,
-    fontWeight: Typography.regular,
-  },
-
-  assinarBtn: { borderRadius: Radius.lg, overflow: 'hidden', marginTop: Spacing.md },
-  assinarBtnLoading: { opacity: 0.7 },
-  assinarBtnGradient: {
-    height: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.lg,
-  },
-  assinarBtnText: {
-    color: Colors.white,
-    fontSize: Typography.base,
-    fontWeight: Typography.bold,
-  },
-  cancelInfo: {
-    fontSize: Typography.xs,
-    color: Colors.muted,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
-  },
-
   divisor: {
     height: 1,
     backgroundColor: Colors.border,
     marginHorizontal: Spacing.lg,
   },
 
-  testeCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: Colors.surface,
-    borderRadius: Radius.xl,
-    padding: Spacing.lg,
-    gap: Spacing.md,
-    marginBottom: Spacing.md,
-    ...Shadow.card,
-  },
-  testeIcon: { fontSize: 28 },
-  testeInfo: { flex: 1 },
-  testeTitulo: {
+  precoLabel: {
     fontSize: Typography.base,
     fontWeight: Typography.semibold,
     color: Colors.text,
-    marginBottom: 4,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.sm,
   },
-  testeDesc: {
-    fontSize: Typography.xs,
-    color: Colors.muted,
-    lineHeight: 17,
+  precoOpcoes: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
-  testeBtn: {
-    height: 48,
+  precoCard: {
+    flex: 1,
+    backgroundColor: Colors.surface,
     borderRadius: Radius.lg,
-    borderWidth: 1.5,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.border,
+    ...Shadow.card,
+  },
+  precoCardSelecionado: {
     borderColor: Colors.teal600,
+    backgroundColor: Colors.teal50,
+  },
+  precoValor: {
+    fontSize: Typography.base,
+    fontWeight: Typography.bold,
+    color: Colors.muted,
+  },
+  precoValorSelecionado: { color: Colors.teal700 },
+  precoPeriodo: {
+    fontSize: Typography.xs,
+    color: Colors.subtle,
+    marginTop: 2,
+  },
+  precoPeriodoSelecionado: { color: Colors.teal600 },
+
+  enviarBtn: { borderRadius: Radius.lg, overflow: 'hidden', marginTop: Spacing.sm },
+  enviarBtnLoading: { opacity: 0.7 },
+  enviarBtnGradient: {
+    height: 52,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
   },
-  testeBtnAtivo: {
-    borderColor: Colors.success,
-    backgroundColor: Colors.success + '11',
-  },
-  testeBtnText: {
+  enviarBtnText: {
+    color: Colors.white,
     fontSize: Typography.base,
-    fontWeight: Typography.semibold,
-    color: Colors.teal700,
+    fontWeight: Typography.bold,
+  },
+
+  sucessoCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    ...Shadow.card,
+  },
+  sucessoIcon: { fontSize: 48, marginBottom: Spacing.md },
+  sucessoTitulo: {
+    fontSize: Typography.lg,
+    fontWeight: Typography.bold,
+    color: Colors.text,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
+  sucessoDesc: {
+    fontSize: Typography.sm,
+    color: Colors.muted,
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

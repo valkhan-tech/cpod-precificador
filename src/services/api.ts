@@ -86,6 +86,7 @@ import {
   ENDPOINTS,
   MAX_SIMULATIONS,
   MOCK_DELAY_MS,
+  WAITLIST_WEBHOOK_URL,
 } from '../constants/api';
 import {
   AuthResponse,
@@ -290,4 +291,24 @@ export async function initiateCheckout(plano: PlanoAssinatura): Promise<Checkout
   await delay(MOCK_DELAY_MS);
   // Mock: retorna uma URL simulada (em produção seria Stripe, etc.)
   return { checkoutUrl: `https://checkout.cpod.com.br/${plano}?mock=true` };
+}
+
+// ─── Lista de espera (cPod Premium) ───────────────────────────────────────────
+
+export interface WaitlistRequest {
+  name: string;
+  email: string;
+  price: number;
+}
+
+export async function joinWaitlist(payload: WaitlistRequest): Promise<void> {
+  const response = await fetch(WAITLIST_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
 }

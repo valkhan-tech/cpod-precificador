@@ -98,7 +98,7 @@ function PremiumGate({ onLogin }: { onLogin: () => void }) {
         <Text style={gateStyles.badgeText}>Em breve para assinantes</Text>
       </View>
       <TouchableOpacity style={gateStyles.loginBtn} onPress={onLogin}>
-        <Text style={gateStyles.loginBtnText}>Entrar / Criar conta</Text>
+        <Text style={gateStyles.loginBtnText}>Entrar na lista de espera</Text>
       </TouchableOpacity>
     </View>
   );
@@ -318,9 +318,9 @@ export default function GrupoCompraScreen() {
   async function salvar() {
     if (!results) return;
     if (!isAuthenticated) {
-      Alert.alert('Conta necessária', 'Crie uma conta gratuita para salvar simulações.', [
+      Alert.alert('Recurso Premium', 'Salvar simulações é um recurso do cPod Premium, em breve disponível.', [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Criar conta', onPress: () => navigation.navigate('Register') },
+        { text: 'Ver detalhes', onPress: () => navigation.navigate('Premium') },
       ]);
       return;
     }

@@ -339,11 +339,11 @@ export default function HoraHomemScreen() {
     if (!results) return;
     if (!isAuthenticated) {
       Alert.alert(
-        'Conta necessária',
-        'Crie uma conta gratuita para salvar simulações.',
+        'Recurso Premium',
+        'Salvar simulações é um recurso do cPod Premium, em breve disponível.',
         [
           { text: 'Cancelar', style: 'cancel' },
-          { text: 'Criar conta', onPress: () => navigation.navigate('Register') },
+          { text: 'Ver detalhes', onPress: () => navigation.navigate('Premium') },
         ]
       );
       return;
